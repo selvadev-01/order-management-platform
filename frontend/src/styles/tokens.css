@@ -1,0 +1,165 @@
+/**
+ * Design tokens.
+ *
+ * The single source of truth for colour in the application. Components never
+ * name a palette step (`slate-600`, `amber-100`); they name a role
+ * (`text-muted`, `bg-warning-soft`). Changing the product's look — or adding a
+ * theme — is an edit to this file, not a grep across 22 components.
+ *
+ * Two layers, deliberately:
+ *
+ *   1. PRIMITIVES  --palette-*  raw values. Referenced only by layer 2.
+ *   2. SEMANTIC    --color-*    roles. The only layer components may use.
+ *
+ * The indirection is what makes a theme possible: a theme re-points semantic
+ * roles at different primitives without touching a component.
+ *
+ * Values are stored as bare `R G B` channels rather than hex, so Tailwind can
+ * apply opacity modifiers to them — `bg-surface/75` needs to inject an alpha
+ * into `rgb(...)`, which a hex string cannot accept.
+ */
+
+@layer base {
+  :root {
+    /* ---------------------------------------------------------- primitives */
+
+    /* Brand — the product's blue. */
+    --palette-brand-50:  238 244 255;
+    --palette-brand-100: 217 228 255;
+    --palette-brand-500:  79 110 247;
+    --palette-brand-600:  59  85 224;
+    --palette-brand-700:  47  67 184;
+    --palette-brand-900:  30  42 112;
+
+    /* Neutral — surfaces, text, borders. */
+    --palette-neutral-50:  248 250 252;
+    --palette-neutral-100: 241 245 249;
+    --palette-neutral-200: 226 232 240;
+    --palette-neutral-300: 203 213 225;
+    --palette-neutral-400: 148 163 184;
+    --palette-neutral-500: 100 116 139;
+    --palette-neutral-600:  71  85 105;
+    --palette-neutral-700:  51  65  85;
+    --palette-neutral-800:  30  41  59;
+    --palette-neutral-900:  15  23  42;
+
+    /* Status hues. */
+    --palette-red-50:   254 242 242;
+    --palette-red-100:  254 226 226;
+    --palette-red-200:  254 202 202;
+    --palette-red-400:  248 113 113;
+    --palette-red-500:  239  68  68;
+    --palette-red-600:  220  38  38;
+    --palette-red-700:  185  28  28;
+    --palette-red-800:  153  27  27;
+
+    --palette-amber-50:  255 251 235;
+    --palette-amber-100: 254 243 199;
+    --palette-amber-300: 252 211  77;
+    --palette-amber-500: 245 158  11;
+    --palette-amber-700: 180  83   9;
+    --palette-amber-800: 146  64  14;
+    --palette-amber-900: 120  53  15;
+
+    --palette-green-50:  240 253 244;
+    --palette-green-100: 220 252 231;
+    --palette-green-700:  21 128  61;
+    --palette-green-800:  22 101  52;
+
+    --palette-blue-100:  219 234 254;
+    --palette-blue-800:   30  64 175;
+    --palette-indigo-100:224 231 255;
+    --palette-indigo-800: 55  48 163;
+    --palette-cyan-100:  207 250 254;
+    --palette-cyan-800:  21 94 117;
+
+    --palette-white: 255 255 255;
+
+    /* ------------------------------------------------------------ semantic */
+
+    /* Surfaces, back to front. */
+    --color-canvas:          var(--palette-neutral-50);   /* page background   */
+    --color-surface:         var(--palette-white);        /* cards, panels     */
+    --color-surface-sunken:  var(--palette-neutral-50);   /* table headers     */
+    --color-surface-hover:   var(--palette-neutral-100);  /* row / button hover*/
+    --color-surface-active:  var(--palette-neutral-200);  /* pressed, skeleton */
+
+    /* The admin sidebar is an inverted surface, not a one-off dark colour. */
+    --color-surface-inverse:       var(--palette-neutral-900);
+    --color-surface-inverse-hover: var(--palette-neutral-800);
+    --color-surface-inverse-muted: var(--palette-neutral-700);
+
+    /* Text, strongest to weakest. */
+    --color-text:            var(--palette-neutral-900);
+    --color-text-secondary:  var(--palette-neutral-600);
+    --color-text-muted:      var(--palette-neutral-500);
+    --color-text-subtle:     var(--palette-neutral-400);
+    --color-text-inverse:    var(--palette-white);
+    --color-text-on-inverse:         var(--palette-neutral-300);
+    --color-text-on-inverse-muted:   var(--palette-neutral-400);
+
+    /* Lines. */
+    --color-border:          var(--palette-neutral-200);
+    --color-border-strong:   var(--palette-neutral-300);
+    --color-border-subtle:   var(--palette-neutral-100);
+    --color-border-inverse:  var(--palette-neutral-800);
+
+    /* Brand / primary action. */
+    --color-primary:         var(--palette-brand-600);
+    --color-primary-hover:   var(--palette-brand-700);
+    --color-primary-soft:    var(--palette-brand-50);
+    --color-primary-text:    var(--palette-brand-700);
+    --color-primary-border:  var(--palette-brand-500);
+    --color-on-primary:      var(--palette-white);
+
+    /*
+     * Status roles. Each has a `-soft` background and a matching `-text` that
+     * is contrast-checked against it, so the pair can never be mismatched at
+     * the call site.
+     */
+    --color-danger:          var(--palette-red-600);
+    --color-danger-hover:    var(--palette-red-700);
+    --color-danger-soft:     var(--palette-red-50);
+    --color-danger-soft-alt: var(--palette-red-100);
+    --color-danger-text:     var(--palette-red-800);
+    --color-danger-strong:   var(--palette-red-500);
+    --color-danger-border:   var(--palette-red-200);
+    --color-danger-border-strong: var(--palette-red-400);
+    --color-on-danger:       var(--palette-white);
+
+    --color-warning:         var(--palette-amber-500);
+    --color-warning-soft:    var(--palette-amber-50);
+    --color-warning-soft-alt:var(--palette-amber-100);
+    --color-warning-text:    var(--palette-amber-800);
+    --color-warning-text-strong: var(--palette-amber-900);
+    --color-warning-border:  var(--palette-amber-300);
+
+    --color-success:         var(--palette-green-700);
+    --color-success-soft:    var(--palette-green-50);
+    --color-success-soft-alt:var(--palette-green-100);
+    --color-success-text:    var(--palette-green-800);
+
+    --color-info:            var(--palette-blue-800);
+    --color-info-soft:       var(--palette-blue-100);
+
+    /* Fulfilment stages that are not pass/fail — they need their own hues so
+       Shipped and Processing stay distinguishable from each other. */
+    --color-stage-shipped-soft:    var(--palette-blue-100);
+    --color-stage-shipped-text:    var(--palette-blue-800);
+    --color-stage-processing-soft: var(--palette-indigo-100);
+    --color-stage-processing-text: var(--palette-indigo-800);
+    --color-stage-confirmed-soft:  var(--palette-cyan-100);
+    --color-stage-confirmed-text:  var(--palette-cyan-800);
+
+    /* Neutral status, for "nothing notable". */
+    --color-neutral-soft:    var(--palette-neutral-100);
+    --color-neutral-text:    var(--palette-neutral-700);
+
+    /* Focus ring — one value, so focus looks identical everywhere. */
+    --color-ring:            var(--palette-brand-500);
+
+    /* Scrim behind modals and drawers. Strong enough to isolate the
+       foreground, per the modal-legibility guidance. */
+    --color-scrim:           var(--palette-neutral-900);
+  }
+}

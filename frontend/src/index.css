@@ -1,0 +1,78 @@
+/*
+ * Tokens must load before Tailwind's base layer, so the variables exist by the
+ * time any utility resolves them.
+ */
+@import './styles/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Visible focus for keyboard users on every interactive element (US-SYS-8 AC7). */
+  :focus-visible {
+    @apply outline-none ring-2 ring-focus ring-offset-2;
+  }
+
+  body {
+    @apply bg-canvas text-content antialiased;
+  }
+
+  /* Pointer affordance on every control, which Tailwind's reset removes from
+     <button>. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  label:has(> input[type='checkbox']) {
+    @apply cursor-pointer;
+  }
+
+  /* Motion is meaningful here, never decorative — so it goes away entirely for
+     anyone who has asked it to. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium
+           transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary { @apply btn bg-primary text-on-primary hover:bg-primary-hover; }
+  .btn-secondary { @apply btn border border-line-strong bg-surface text-content-secondary hover:bg-surface-hover; }
+  .btn-danger { @apply btn bg-danger text-on-danger hover:bg-danger-hover; }
+
+  .input {
+    @apply w-full rounded-lg border border-line-strong bg-surface px-3 py-2.5 text-sm text-content
+           placeholder:text-content-subtle focus:border-primary-border;
+  }
+  .input-error { @apply border-danger-border-strong; }
+  .label { @apply mb-1.5 block text-sm font-medium text-content-secondary; }
+
+  .card { @apply rounded-xl border border-line bg-surface; }
+  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+
+  /* Admin surface. A touch flatter than .card — the panel is a working
+     container in a dense grid, not a product tile that needs to lift. */
+  .admin-panel { @apply rounded-xl border border-line bg-surface shadow-sm; }
+
+  /*
+   * Status pills.
+   *
+   * Defined once here rather than as class strings assembled in JavaScript, so
+   * "Paid is green" is stated in exactly one place. utils/status.js maps a
+   * status value to one of these names.
+   */
+  .badge-success { @apply bg-success-soft-alt text-success-text; }
+  .badge-danger  { @apply bg-danger-soft-alt text-danger-text; }
+  .badge-warning { @apply bg-warning-soft-alt text-warning-text; }
+  .badge-neutral { @apply bg-neutral-soft text-neutral-text; }
+  .badge-shipped    { @apply bg-stage-shipped-soft text-stage-shipped-text; }
+  .badge-processing { @apply bg-stage-processing-soft text-stage-processing-text; }
+  .badge-confirmed  { @apply bg-stage-confirmed-soft text-stage-confirmed-text; }
+}

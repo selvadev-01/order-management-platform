@@ -1,0 +1,43 @@
+{
+  "name": "order-management-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mini E-Commerce / Order Management Platform — MERN, microservices, Redis, BullMQ, payments, push notifications",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "shared",
+    "gateway",
+    "services/*",
+    "workers/*",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n gateway,auth,product,order,payment,notify,worker,web -c cyan,green,yellow,blue,magenta,white,gray,red \"npm:dev:gateway\" \"npm:dev:auth\" \"npm:dev:product\" \"npm:dev:order\" \"npm:dev:payment\" \"npm:dev:notification\" \"npm:dev:worker\" \"npm:dev:frontend\"",
+    "dev:gateway": "npm run dev --workspace gateway",
+    "dev:auth": "npm run dev --workspace auth-service",
+    "dev:product": "npm run dev --workspace product-service",
+    "dev:order": "npm run dev --workspace order-service",
+    "dev:payment": "npm run dev --workspace payment-service",
+    "dev:notification": "npm run dev --workspace notification-service",
+    "dev:worker": "npm run dev --workspace notification-worker",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "seed": "node scripts/seed.js",
+    "lint": "eslint .",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "dependencies": {
+    "@oms/shared": "*",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.7",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "eslint": "^9.17.0",
+    "nodemon": "^3.1.9"
+  }
+}

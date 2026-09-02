@@ -1,0 +1,113 @@
+# Render Blueprint — free-tier deployment.
+#
+# Optional: everything here can also be configured by hand in the dashboard.
+# Committing it means the deployment is reproducible and reviewable.
+#
+# The backend runs as ONE web service (see server.js for why): Render's free
+# plan offers no background-worker process type, so the BullMQ worker runs
+# in-process. The service split is unchanged in code — services/* still each
+# build their own app and can be deployed separately on a paid plan.
+#
+# MongoDB and Redis are NOT defined here. Render's free plan includes neither,
+# so they come from MongoDB Atlas (M0) and Upstash — set their URLs as secrets
+# in the dashboard.
+
+services:
+  - type: web
+    name: oms-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    # Render pings this to decide whether a deploy succeeded.
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+
+      # --- Secrets: set these in the dashboard, never in this file ---------
+      - key: MONGODB_URI
+        sync: false # MongoDB Atlas M0 connection string
+      - key: REDIS_URL
+        sync: false # Upstash rediss:// URL (TLS — BullMQ requires it)
+      - key: JWT_SECRET
+        generateValue: true # Render generates a strong value on first deploy
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
+
+      # Set to the static site's real URL after its first deploy, then
+      # redeploy this service. No wildcards — the allowlist is explicit.
+      - key: CORS_ORIGINS
+        sync: false
+
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: BCRYPT_SALT_ROUNDS
+        value: "12"
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX
+        value: "300"
+      - key: AUTH_RATE_LIMIT_MAX
+        value: "10"
+      - key: CACHE_TTL_SECONDS
+        value: "300"
+      - key: CATEGORY_CACHE_TTL_SECONDS
+        value: "3600"
+      - key: QUEUE_ATTEMPTS
+        value: "5"
+      - key: QUEUE_BACKOFF_DELAY_MS
+        value: "1000"
+      # Kept low: the free instance shares 0.1 CPU with the HTTP listener.
+      - key: QUEUE_CONCURRENCY
+        value: "3"
+
+      # Cross-service URLs. In this single-process deployment the service
+      # clients are pointed at the process itself by server.js, but the config
+      # schemas still validate these as URLs at startup.
+      - key: AUTH_SERVICE_URL
+        value: http://127.0.0.1:10000
+      - key: PRODUCT_SERVICE_URL
+        value: http://127.0.0.1:10000
+      - key: ORDER_SERVICE_URL
+        value: http://127.0.0.1:10000
+      - key: PAYMENT_SERVICE_URL
+        value: http://127.0.0.1:10000
+      - key: NOTIFICATION_SERVICE_URL
+        value: http://127.0.0.1:10000
+
+  - type: web
+    name: oms-web
+    runtime: static
+    branch: main
+    buildCommand: npm install && npm run build --workspace frontend
+    staticPublishPath: frontend/dist
+    envVars:
+      # Absolute URL of the API service above. The Vite dev proxy does not
+      # exist in a production build, so a relative path would 404.
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_RAZORPAY_KEY_ID
+        sync: false
+      - key: VITE_VAPID_PUBLIC_KEY
+        sync: false
+    routes:
+      # Client-side routing: every unknown path must serve index.html or a
+      # refresh on /products/123 would 404.
+      - type: rewrite
+        source: /*
+        destination: /index.html

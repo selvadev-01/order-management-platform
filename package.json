@@ -16,6 +16,10 @@
     "frontend"
   ],
   "scripts": {
+    "start": "node server.js",
+    "start:backend": "node server.js",
+    "start:frontend": "npm run start --workspace frontend",
+    "build": "npm run build --workspace frontend",
     "dev": "concurrently -n gateway,auth,product,order,payment,notify,worker,web -c cyan,green,yellow,blue,magenta,white,gray,red \"npm:dev:gateway\" \"npm:dev:auth\" \"npm:dev:product\" \"npm:dev:order\" \"npm:dev:payment\" \"npm:dev:notification\" \"npm:dev:worker\" \"npm:dev:frontend\"",
     "dev:gateway": "npm run dev --workspace gateway",
     "dev:auth": "npm run dev --workspace auth-service",

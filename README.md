@@ -26,6 +26,7 @@ Customers browse products, add them to a cart, place an order, pay through a pay
 - [Security](#security)
 - [Test credentials](#test-credentials)
 - [Payment sandbox](#payment-sandbox)
+- [Deployment](#deployment)
 - [Documentation](#documentation)
 
 ---
@@ -710,6 +711,101 @@ Sending the same request twice returns `"duplicate": true` and changes nothing �
 | Confirmation page polls then stops | Bounded at ~30s. The order is safe and payment can be retried from **My orders**. |
 
 The gateway is swappable — the brief permits Stripe or PayPal equally, and the payment stories are written gateway-agnostic. Only [`gateway.js`](services/payment-service/src/gateway.js) and the signature helper would change.
+
+---
+
+## Deployment
+
+The application runs in two shapes from one codebase. Nothing about the service
+split changes between them — only the process boundary.
+
+| | Processes | Entry point | Used for |
+|---|---|---|---|
+| **Service-per-process** | 8 | `services/*/src/index.js`, `workers/*/src/index.js` | Local development (`npm run dev`), and any host offering multiple services |
+| **Single-process** | 1 | [`server.js`](server.js) (`npm start`) | Free hosting tiers |
+
+### Production commands
+
+Backend and frontend are deployed as separate units and have separate commands.
+Both are run from the repository root.
+
+| | Command | Serves |
+|---|---|---|
+| Build the frontend | `npm run build` | Writes `frontend/dist` |
+| Backend | `npm run start:backend` | API on `$PORT` (default 4000) |
+| Frontend | `npm run start:frontend` | Built SPA on `$PORT` (default 4173) |
+
+`npm start` is an alias for `npm run start:backend`, since that is the command
+a host runs by default.
+
+Each service builds its Express app in an `app.factory.js` that both entry
+points import. A service verifies the JWT and enforces its own roles either
+way, so mounting them together does not weaken the security boundary — a
+request reaching a service is checked identically in both shapes.
+
+### Why a single process on free tiers
+
+Free plans give one command binding one port, and no background-worker process
+type. The BullMQ worker would have nowhere to run, and six services sleeping
+independently would chain cold starts on the first request. `server.js`
+composes the same apps in-band and starts the worker alongside them.
+
+Two details it preserves deliberately:
+
+- **No body parser at the top level.** The payment webhook computes its HMAC
+  over the exact bytes received, so the raw body must reach the payment app
+  untouched — the same reason the gateway parses nothing.
+- **Cross-service calls stay HTTP.** `ServiceClient` is pointed at the
+  process's own origin rather than replaced with direct imports, so the service
+  interface is unchanged.
+
+### Free hosting
+
+Render's free plan includes neither Redis nor MongoDB, so those come from
+managed free tiers:
+
+| Piece | Service | Free tier |
+|---|---|---|
+| Backend | Render web service | 750 hrs/month; sleeps after 15 min idle (~50 s cold start) |
+| Frontend | Render static site | Unlimited |
+| MongoDB | MongoDB Atlas M0 | 512 MB |
+| Redis | Upstash | 10,000 commands/day |
+
+[`render.yaml`](render.yaml) defines both services. Secrets are marked
+`sync: false` and set in the dashboard — none are committed.
+
+**Managed-service setup**
+
+- **Atlas** — create an M0 cluster, add a database user, and allow
+  `0.0.0.0/0` under Network Access. Render's free tier has no static outbound
+  IPs, so an IP allowlist would block it.
+- **Upstash** — create a database in a region near the Render service and copy
+  the **`rediss://`** URL. BullMQ needs the TLS endpoint.
+
+**Deploy order**
+
+The frontend's URL is not known until it exists, and the backend's CORS
+allowlist needs it, so:
+
+1. Deploy the API service; set `MONGODB_URI`, `REDIS_URL`, the Razorpay keys,
+   and the VAPID keys.
+2. Deploy the static site with `VITE_API_BASE_URL` set to the API's absolute
+   HTTPS URL. A relative path would 404 — the Vite dev proxy exists only in
+   development.
+3. Set `CORS_ORIGINS` on the API to the static site's origin and redeploy.
+4. Point the Razorpay webhook at `https://<api-host>/api/payments/webhook`
+   using the same `RAZORPAY_WEBHOOK_SECRET`.
+5. Seed the database: `npm run seed` with `MONGODB_URI` set to the Atlas
+   string. Free instances have no shell, so run it locally against Atlas.
+
+**Free-tier caveats**
+
+- The first request after 15 minutes idle takes ~50 s while the instance wakes.
+  A webhook arriving then is retried by Razorpay, so payments still settle.
+- Delayed jobs — the abandoned-cart reminder — only fire while the instance is
+  awake. A sleeping instance runs no worker.
+- `QUEUE_CONCURRENCY` is lowered to 3 in `render.yaml`: the worker shares
+  0.1 CPU with the HTTP listener.
 
 ---
 

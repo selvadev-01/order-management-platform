@@ -62,6 +62,12 @@ export const NotificationEvent = {
   ORDER_CONFIRMED: 'ORDER_CONFIRMED',
   ORDER_SHIPPED: 'ORDER_SHIPPED',
   ORDER_DELIVERED: 'ORDER_DELIVERED',
+  /**
+   * Reminder for a cart left unconverted. Unlike the others this is not
+   * triggered by something that happened, but by something that did NOT happen
+   * within a window — which is why it is the delayed job (docx §7).
+   */
+  ABANDONED_CART: 'ABANDONED_CART',
 };
 
 /** Maps an order status change to the notification it should raise. */
@@ -79,6 +85,14 @@ export const NotificationStatus = {
 };
 
 export const QUEUE_NAME = 'notifications';
+
+/**
+ * How long a cart may sit untouched before it is considered abandoned.
+ *
+ * Short enough to be demonstrable in a review session, long enough that a
+ * customer still shopping is not nagged mid-session.
+ */
+export const ABANDONED_CART_DELAY_MS = 30 * 60 * 1000;
 
 export const DEFAULT_PAGE_SIZE = 12;
 export const MAX_PAGE_SIZE = 100;

@@ -35,10 +35,10 @@ function AdminStatusPanel({ order, onAdvance, busy }) {
   const blocked = next && next !== 'Confirmed' && order.paymentStatus !== 'Paid';
 
   return (
-    <div className="mt-5 flex flex-wrap items-center gap-3 rounded-lg border border-line bg-surface-hover px-4 py-3">
+    <div className="mt-5 flex flex-wrap items-center gap-3 rounded-control border border-line bg-surface-hover px-4 py-3">
       <div className="flex-1 min-w-[12rem]">
-        <p className="text-sm font-medium text-content">Order status</p>
-        <p className="text-sm text-content-muted">
+        <p className="text-meta font-medium text-content">Order status</p>
+        <p className="text-meta text-content-muted">
           {next
             ? blocked
               ? 'Payment must be completed before this order can advance.'
@@ -59,7 +59,7 @@ function AdminStatusPanel({ order, onAdvance, busy }) {
           {`Mark ${next}`}
         </button>
       ) : (
-        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
+        <span className="inline-flex items-center gap-1.5 text-meta font-medium text-success">
           <CheckIcon className="h-4 w-4" />
           Complete
         </span>
@@ -71,13 +71,13 @@ function AdminStatusPanel({ order, onAdvance, busy }) {
 function StatusStepper({ current }) {
   const index = STEPS.indexOf(current);
   return (
-    <ol className="flex flex-wrap items-center gap-x-2 gap-y-2 text-sm" aria-label="Order progress">
+    <ol className="flex flex-wrap items-center gap-x-2 gap-y-2 text-meta" aria-label="Order progress">
       {STEPS.map((s, i) => {
         const done = i <= index;
         return (
           <li key={s} className="flex items-center gap-2">
             <span
-              className={`badge gap-1 ${done ? 'bg-brand-600 text-content-inverse' : 'bg-surface-hover text-content-muted'}`}
+              className={`badge gap-1 ${done ? 'bg-primary text-on-primary' : 'bg-surface-hover text-content-muted'}`}
               aria-current={i === index ? 'step' : undefined}
             >
               {done && <CheckIcon className="h-3.5 w-3.5" />}
@@ -196,7 +196,7 @@ export default function OrderDetail() {
     return (
       <div className="space-y-4">
         <div className="h-8 w-1/3 animate-pulse rounded bg-surface-active" />
-        <div className="h-40 animate-pulse rounded-xl bg-surface-hover" />
+        <div className="h-40 animate-pulse rounded-panel bg-surface-hover" />
       </div>
     );
   }
@@ -223,7 +223,7 @@ export default function OrderDetail() {
 
   return (
     <div>
-      <nav className="mb-6 text-sm text-content-muted" aria-label="Breadcrumb">
+      <nav className="mb-6 text-meta text-content-muted" aria-label="Breadcrumb">
         {/* Admins reach this page from the admin list, so send them back there. */}
         <Link to={isAdmin ? '/admin/orders' : '/orders'} className="hover:text-content">
           {isAdmin ? 'All orders' : 'My orders'}
@@ -235,14 +235,14 @@ export default function OrderDetail() {
       {/* The awaiting state must not look like a failure (US-PAY-3 AC5). */}
       {polling && (
         <div
-          className="mb-6 flex items-center gap-3 rounded-xl border border-brand-100 bg-brand-50 px-4 py-3.5"
+          className="mb-6 flex items-center gap-3 rounded-panel border border-primary-border bg-primary-soft px-4 py-3.5"
           role="status"
           aria-live="polite"
         >
-          <Spinner className="h-5 w-5 text-brand-600" />
+          <Spinner className="h-5 w-5 text-primary" />
           <div>
-            <p className="font-medium text-brand-900">Confirming your payment…</p>
-            <p className="text-sm text-brand-700">
+            <p className="font-medium text-primary-text">Confirming your payment…</p>
+            <p className="text-meta text-primary-text">
               We are waiting for the payment gateway to confirm. This usually takes a few seconds.
             </p>
           </div>
@@ -252,8 +252,8 @@ export default function OrderDetail() {
       <div className="card p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold text-content">Order {order.id.slice(-8)}</h1>
-            <p className="mt-1 text-sm text-content-muted">Placed {formatDateTime(order.createdAt)}</p>
+            <h1 className="text-title font-semibold text-content">Order {order.id.slice(-8)}</h1>
+            <p className="mt-1 text-meta text-content-muted">Placed {formatDateTime(order.createdAt)}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {/* Two separate fields — they can legitimately disagree. */}
@@ -276,8 +276,8 @@ export default function OrderDetail() {
 
         {/* Payment is the customer's action — an admin cannot pay on their behalf. */}
         {unpaid && !polling && !isAdmin && (
-          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-lg border border-warning-border bg-warning-soft px-4 py-3">
-            <p className="flex-1 text-sm text-warning-text-strong">
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-control border border-warning-border bg-warning-soft px-4 py-3">
+            <p className="flex-1 text-meta text-warning-text-strong">
               This order has not been paid yet.
             </p>
             <button type="button" onClick={retryPayment} disabled={retrying} className="btn-primary">
@@ -296,7 +296,7 @@ export default function OrderDetail() {
               <li key={item.productId} className="flex items-center justify-between gap-4 py-3">
                 <div className="min-w-0">
                   <p className="truncate font-medium text-content">{item.name}</p>
-                  <p className="text-sm text-content-muted">
+                  <p className="text-meta text-content-muted">
                     {formatMoney(item.unitPrice)} × {item.quantity}
                   </p>
                 </div>
@@ -306,14 +306,14 @@ export default function OrderDetail() {
           </ul>
           <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
             <span className="font-semibold">Total</span>
-            <span className="text-xl font-semibold">{formatMoney(order.totalAmount)}</span>
+            <span className="text-title font-semibold">{formatMoney(order.totalAmount)}</span>
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="card p-5">
             <h2 className="font-semibold text-content">Delivery address</h2>
-            <address className="mt-3 not-italic text-sm leading-relaxed text-content-secondary">
+            <address className="mt-3 not-italic text-meta leading-relaxed text-content-secondary">
               {order.customerInfo?.name}<br />
               {order.deliveryAddress?.line1}<br />
               {order.deliveryAddress?.line2 && <>{order.deliveryAddress.line2}<br /></>}
@@ -325,7 +325,7 @@ export default function OrderDetail() {
 
           <div className="card p-5">
             <h2 className="font-semibold text-content">Contact</h2>
-            <p className="mt-3 text-sm text-content-secondary">
+            <p className="mt-3 text-meta text-content-secondary">
               {order.customerInfo?.email}<br />
               {order.customerInfo?.phone}
             </p>

@@ -37,7 +37,7 @@ export function LoadingRows({ count = 5 }) {
     <div className="space-y-3" role="status" aria-label="Loading">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="card flex items-center gap-4 p-4">
-          <div className="h-14 w-14 shrink-0 animate-pulse rounded-lg bg-surface-active" />
+          <div className="h-14 w-14 shrink-0 animate-pulse rounded-control bg-surface-active" />
           <div className="flex-1 space-y-2">
             <div className="h-4 w-1/3 animate-pulse rounded bg-surface-active" />
             <div className="h-3 w-1/4 animate-pulse rounded bg-surface-hover" />
@@ -69,8 +69,8 @@ export function EmptyState({ title, message, action, icon: IconCmp = BoxIcon }) 
       <span className="mb-4 grid h-12 w-12 place-items-center rounded-full bg-surface-hover text-content-subtle">
         <IconCmp className="h-6 w-6" />
       </span>
-      <h3 className="text-base font-semibold text-content">{title}</h3>
-      {message && <p className="mt-1.5 max-w-sm text-sm text-content-muted">{message}</p>}
+      <h3 className="text-heading font-semibold text-content">{title}</h3>
+      {message && <p className="mt-1.5 max-w-sm text-meta text-content-muted">{message}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -86,7 +86,7 @@ export function EmptyState({ title, message, action, icon: IconCmp = BoxIcon }) 
  */
 export function EmptyNotice({ message, icon: IconCmp }) {
   return (
-    <div className="flex flex-col items-center gap-2 py-6 text-center text-sm text-content-muted" role="status">
+    <div className="flex flex-col items-center gap-2 py-6 text-center text-meta text-content-muted" role="status">
       {IconCmp && <IconCmp className="h-5 w-5 text-content-subtle" />}
       <p>{message}</p>
     </div>
@@ -101,10 +101,10 @@ export function ErrorState({ error, onRetry, retrying }) {
       <span className="mb-4 grid h-12 w-12 place-items-center rounded-full bg-danger-soft text-danger">
         {offline ? <PlugOffIcon className="h-6 w-6" /> : <AlertIcon className="h-6 w-6" />}
       </span>
-      <h3 className="text-base font-semibold text-content">
+      <h3 className="text-heading font-semibold text-content">
         {offline ? 'Cannot reach the server' : 'Something went wrong'}
       </h3>
-      <p className="mt-1.5 max-w-sm text-sm text-content-muted">
+      <p className="mt-1.5 max-w-sm text-meta text-content-muted">
         {error?.message ?? 'Please try again.'}
       </p>
       {onRetry && (
@@ -121,7 +121,7 @@ export function ErrorState({ error, onRetry, retrying }) {
 export function FormError({ message }) {
   if (!message) return null;
   return (
-    <div className="rounded-lg border border-danger-border bg-danger-soft px-3.5 py-2.5 text-sm text-danger-text" role="alert">
+    <div className="rounded-control border border-danger-border bg-danger-soft px-3.5 py-2.5 text-meta text-danger-text" role="alert">
       {message}
     </div>
   );
@@ -137,7 +137,7 @@ export function FormError({ message }) {
 export function FieldError({ id, message }) {
   if (!message) return null;
   return (
-    <p id={id} className="mt-1.5 text-sm text-danger" role="alert">
+    <p id={id} className="mt-1.5 text-meta text-danger" role="alert">
       {message}
     </p>
   );

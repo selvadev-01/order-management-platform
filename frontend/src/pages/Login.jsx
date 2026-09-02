@@ -55,18 +55,18 @@ export default function Login() {
   };
 
   return (
-    <div className="mx-auto max-w-md py-8">
-      <div className="card p-6 sm:p-8">
-        <h1 className="text-xl font-semibold text-content">Sign in</h1>
-        <p className="mt-1 text-sm text-content-muted">Welcome back.</p>
+    <div className="mx-auto max-w-md py-10 sm:py-14">
+      <div className="card p-6 shadow-floating sm:p-8">
+        <h1 className="text-display font-semibold text-content">Sign in</h1>
+        <p className="mt-2 text-body text-content-muted">Welcome back.</p>
 
         {redirected && (
-          <p className="mt-4 rounded-lg bg-brand-50 px-3.5 py-2.5 text-sm text-brand-900" role="status">
+          <p className="mt-4 rounded-control bg-primary-soft px-3.5 py-2.5 text-meta text-primary-text" role="status">
             Please sign in to continue.
           </p>
         )}
 
-        <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
+        <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
           <FormError message={formError} />
 
           <div>
@@ -104,7 +104,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-hover"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-eyebrow font-medium text-content-secondary hover:bg-surface-hover"
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -118,9 +118,9 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-content-secondary">
+        <p className="mt-7 border-t border-line-subtle pt-5 text-center text-meta text-content-secondary">
           No account?{' '}
-          <Link to="/register" className="font-medium text-brand-600 hover:underline">
+          <Link to="/register" className="font-semibold text-primary-text hover:underline">
             Create one
           </Link>
         </p>

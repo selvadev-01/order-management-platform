@@ -11,8 +11,10 @@ import { useCart } from '../context/CartContext';
 import { BellIcon, CartIcon, CloseIcon, MenuIcon, StorefrontIcon } from './Icons';
 
 function navClass({ isActive }) {
-  return `rounded-lg px-3 py-2 text-sm font-medium transition ${
-    isActive ? 'bg-brand-50 text-brand-700' : 'text-content-secondary hover:bg-surface-hover'
+  return `rounded-control px-3 py-2 text-meta font-medium transition ${
+    isActive
+      ? 'bg-primary-soft text-primary-text'
+      : 'text-content-secondary hover:bg-surface-hover hover:text-content'
   }`;
 }
 
@@ -40,15 +42,15 @@ export default function Layout() {
       {/* Skip link: first tab stop, lets keyboard users bypass the nav. */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:shadow"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-surface focus:px-4 focus:py-2 focus:shadow"
       >
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-line bg-surface/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <Link to="/products" className="flex items-center gap-2 font-semibold text-content">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-content-inverse">
+            <span className="grid h-8 w-8 place-items-center rounded-control bg-primary text-on-primary">
               <StorefrontIcon className="h-5 w-5" />
             </span>
             <span className="hidden sm:inline">Order Platform</span>
@@ -66,7 +68,7 @@ export default function Layout() {
             {isAuthenticated && (
               <Link
                 to="/notifications"
-                className="grid h-11 w-11 place-items-center rounded-lg text-content-secondary hover:bg-surface-hover"
+                className="grid h-11 w-11 place-items-center rounded-control text-content-secondary hover:bg-surface-hover"
                 aria-label="Notifications"
               >
                 <BellIcon className="h-5 w-5" />
@@ -75,12 +77,12 @@ export default function Layout() {
 
             <Link
               to="/cart"
-              className="relative grid h-11 w-11 place-items-center rounded-lg text-content-secondary hover:bg-surface-hover"
+              className="relative grid h-11 w-11 place-items-center rounded-control text-content-secondary hover:bg-surface-hover"
               aria-label={`Cart, ${itemCount} item${itemCount === 1 ? '' : 's'}`}
             >
               <CartIcon className="h-5 w-5" />
               {itemCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-brand-600 px-1 text-xs font-semibold text-content-inverse">
+                <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-primary px-1 text-eyebrow font-semibold text-content-inverse">
                   {itemCount}
                 </span>
               )}
@@ -88,7 +90,7 @@ export default function Layout() {
 
             {isAuthenticated ? (
               <div className="hidden items-center gap-2 md:flex">
-                <span className="max-w-[12rem] truncate text-sm text-content-secondary">{user.name}</span>
+                <span className="max-w-[12rem] truncate text-meta text-content-secondary">{user.name}</span>
                 {/* A button, not a link — it performs an action. */}
                 <button type="button" onClick={handleLogout} className="btn-secondary py-2">
                   Log out
@@ -104,7 +106,7 @@ export default function Layout() {
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
-              className="grid h-11 w-11 place-items-center rounded-lg text-content-secondary hover:bg-surface-hover md:hidden"
+              className="grid h-11 w-11 place-items-center rounded-control text-content-secondary hover:bg-surface-hover md:hidden"
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
               aria-label="Toggle menu"
@@ -145,7 +147,7 @@ export default function Layout() {
       </main>
 
       <footer className="border-t border-line bg-surface py-6">
-        <p className="mx-auto max-w-7xl px-4 text-sm text-content-muted sm:px-6">
+        <p className="mx-auto max-w-7xl px-4 text-meta text-content-muted sm:px-6">
           Order Management Platform — demonstration build.
         </p>
       </footer>

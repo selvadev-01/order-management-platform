@@ -73,6 +73,12 @@ const orderSchema = new mongoose.Schema(
     },
     // Set by the Payment Service once a webhook verifies.
     paymentId: { type: mongoose.Schema.Types.ObjectId, default: null },
+    /**
+     * When this order's reserved stock was returned to the catalogue.
+     * Null while the reservation still stands — the marker that stops a
+     * redelivered webhook releasing the same stock twice.
+     */
+    stockReleasedAt: { type: Date, default: null },
     statusHistory: [
       {
         status: String,

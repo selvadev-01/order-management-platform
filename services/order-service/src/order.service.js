@@ -61,16 +61,34 @@ export class OrderService {
 
     const totalAmount = sumMinor(items.map((i) => i.lineTotal));
 
-    const order = await Order.create({
-      userId,
-      items,
-      totalAmount,
-      customerInfo,
-      deliveryAddress,
-      orderStatus: OrderStatus.PENDING,
-      paymentStatus: PaymentStatus.PENDING,
-      statusHistory: [{ status: OrderStatus.PENDING, at: new Date(), by: userId }],
-    });
+    /**
+     * Reserve stock BEFORE the order is written.
+     *
+     * The Product Service decrements each line conditionally, so two customers
+     * racing for the last unit cannot both succeed — the check-then-write the
+     * cart validation performs is not itself atomic, and this is what closes
+     * that gap. A rejection surfaces as a 409 naming the product.
+     */
+    await this.#reserveStock(items, token);
+
+    let order;
+    try {
+      order = await Order.create({
+        userId,
+        items,
+        totalAmount,
+        customerInfo,
+        deliveryAddress,
+        orderStatus: OrderStatus.PENDING,
+        paymentStatus: PaymentStatus.PENDING,
+        statusHistory: [{ status: OrderStatus.PENDING, at: new Date(), by: userId }],
+      });
+    } catch (err) {
+      // Stock is already decremented for an order that does not exist; putting
+      // it back is the only way the catalogue stays truthful.
+      await this.releaseStockForItems(items, token);
+      throw err;
+    }
 
     // The cart is emptied only after the order commits, so a failed creation
     // never loses the customer's basket.
@@ -87,6 +105,45 @@ export class OrderService {
     await this.#enqueueNotification(order, 'ORDER_PLACED');
 
     return order.toJSON();
+  }
+
+  /** Line payload shared by the reserve and release calls. */
+  static #stockLines(items) {
+    return items.map((i) => ({ productId: String(i.productId), quantity: i.quantity }));
+  }
+
+  /**
+   * Take stock for these lines. Throws if any line cannot be satisfied —
+   * the Product Service has already rolled back the rest by then.
+   */
+  async #reserveStock(items, token) {
+    if (!this.products) return;
+    await this.products.post(
+      '/api/products/stock/reserve',
+      { items: OrderService.#stockLines(items) },
+      { token },
+    );
+  }
+
+  /**
+   * Put stock back for an order that will not be fulfilled.
+   *
+   * Never throws: this runs on paths that are already handling a failure or
+   * completing a cancellation, and a release problem must not mask the
+   * original outcome. A failure here leaves stock understated, which is the
+   * safe direction — it can only under-sell, never over-sell.
+   */
+  async releaseStockForItems(items, token) {
+    if (!this.products) return;
+    try {
+      await this.products.post(
+        '/api/products/stock/release',
+        { items: OrderService.#stockLines(items) },
+        { token },
+      );
+    } catch (err) {
+      this.logger?.error({ err, lines: items.length }, 'failed to release stock');
+    }
   }
 
   async #enqueueNotification(order, event) {
@@ -240,14 +297,34 @@ export class OrderService {
     return detail(order.toObject());
   }
 
-  async markPaymentFailed(orderId) {
-    const order = await Order.findByIdAndUpdate(
-      orderId,
-      { paymentStatus: PaymentStatus.FAILED },
+  /**
+   * Mark an order's payment failed and return its stock to the catalogue.
+   *
+   * The conditional filter makes this idempotent: only the first call matches
+   * an order that is not already Failed, so a redelivered webhook cannot
+   * release the same stock twice and inflate the catalogue.
+   */
+  async markPaymentFailed(orderId, token) {
+    const order = await Order.findOneAndUpdate(
+      { _id: orderId, paymentStatus: { $ne: PaymentStatus.FAILED } },
+      { paymentStatus: PaymentStatus.FAILED, stockReleasedAt: new Date() },
       { new: true },
     );
-    if (!order) throw notFound('Order not found');
-    this.logger?.warn({ orderId }, 'order payment failed');
+
+    if (!order) {
+      // Either it does not exist, or it was already failed — distinguish, so a
+      // duplicate webhook is a no-op rather than a 404.
+      const existing = await Order.findById(orderId);
+      if (!existing) throw notFound('Order not found');
+      this.logger?.debug({ orderId }, 'payment already failed — ignoring duplicate');
+      return detail(existing.toObject());
+    }
+
+    // The goods were never paid for, so holding their stock only blocks other
+    // customers from buying them.
+    await this.releaseStockForItems(order.items, token);
+
+    this.logger?.warn({ orderId }, 'order payment failed — stock released');
     return detail(order.toObject());
   }
 }

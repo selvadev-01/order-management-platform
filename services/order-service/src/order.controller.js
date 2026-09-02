@@ -70,10 +70,13 @@ export function buildControllers({ cartService, orderService }) {
      */
     async markPayment(req, res) {
       const { paymentStatus, paymentId } = req.body;
+      // The caller's token is forwarded so the stock release can reach the
+      // Product Service as an authenticated request.
+      const token = req.headers.authorization?.replace(/^Bearer /i, '');
       const order =
         paymentStatus === 'Paid'
           ? await orderService.markPaid(req.params.id, { paymentId })
-          : await orderService.markPaymentFailed(req.params.id);
+          : await orderService.markPaymentFailed(req.params.id, token);
       res.json({ order });
     },
   };

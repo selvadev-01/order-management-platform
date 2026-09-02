@@ -146,6 +146,48 @@ export default {
         DEFAULT: token('ring'),
         focus: token('ring'),
       },
+
+      /*
+       * Type scale.
+       *
+       * Colour was already tokenised; size was not, so 64 `text-sm` and 33
+       * `text-xs` had accumulated with no stated relationship between them.
+       * These are semantic roles — a page title is `text-title`, not `text-2xl`
+       * — so the ramp can be retuned in one place.
+       *
+       * Each pairs a size with the line-height and tracking it actually wants:
+       * display sizes tighten, body stays loose enough to read.
+       */
+      fontSize: {
+        display: ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.02em' }],
+        title: ['1.5rem', { lineHeight: '1.875rem', letterSpacing: '-0.017em' }],
+        heading: ['1.125rem', { lineHeight: '1.5rem', letterSpacing: '-0.011em' }],
+        body: ['0.9375rem', { lineHeight: '1.5rem' }],
+        meta: ['0.8125rem', { lineHeight: '1.25rem' }],
+        // Uppercase eyebrow labels need the tracking opened back up.
+        eyebrow: ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.06em' }],
+      },
+
+      /*
+       * Elevation.
+       *
+       * Three steps, each a two-layer shadow: a tight contact shadow for the
+       * edge plus a wider ambient one for depth. A single large blur reads as
+       * grey haze rather than lift. Tuned low-alpha so cards separate from the
+       * canvas without the page looking heavy.
+       */
+      boxShadow: {
+        raised: '0 1px 2px 0 rgb(var(--palette-neutral-900) / 0.04), 0 1px 3px 0 rgb(var(--palette-neutral-900) / 0.06)',
+        floating: '0 2px 4px -1px rgb(var(--palette-neutral-900) / 0.05), 0 8px 16px -4px rgb(var(--palette-neutral-900) / 0.10)',
+        overlay: '0 8px 12px -4px rgb(var(--palette-neutral-900) / 0.08), 0 24px 40px -8px rgb(var(--palette-neutral-900) / 0.16)',
+      },
+
+      /* Radius ramp: controls, containers, then the surfaces that sit on top. */
+      borderRadius: {
+        control: '0.5rem',
+        panel: '0.75rem',
+        overlay: '1rem',
+      },
     },
   },
   plugins: [],

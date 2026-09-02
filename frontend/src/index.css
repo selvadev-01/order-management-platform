@@ -39,27 +39,80 @@
 }
 
 @layer components {
+  /*
+   * Buttons.
+   *
+   * `active:translate-y-px` gives a press a physical response — the one piece of
+   * motion worth adding to a control, and it costs nothing on touch where there
+   * is no hover to rely on. Disabled loses the shadow too, so a dead control
+   * does not still look raised.
+   */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium
-           transition disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-control px-4 py-2.5 text-meta font-medium
+           transition-[background-color,box-shadow,transform,border-color] duration-150
+           active:translate-y-px
+           disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
   }
-  .btn-primary { @apply btn bg-primary text-on-primary hover:bg-primary-hover; }
-  .btn-secondary { @apply btn border border-line-strong bg-surface text-content-secondary hover:bg-surface-hover; }
-  .btn-danger { @apply btn bg-danger text-on-danger hover:bg-danger-hover; }
+  .btn-primary {
+    @apply btn bg-primary text-on-primary shadow-raised hover:bg-primary-hover hover:shadow-floating;
+  }
+  .btn-secondary {
+    @apply btn border border-line-strong bg-surface text-content-secondary
+           hover:border-line-strong hover:bg-surface-hover hover:text-content;
+  }
+  .btn-danger {
+    @apply btn bg-danger text-on-danger shadow-raised hover:bg-danger-hover hover:shadow-floating;
+  }
+  /* Text-weight action for a tertiary choice that should not compete. */
+  .btn-ghost {
+    @apply btn text-content-secondary hover:bg-surface-hover hover:text-content;
+  }
 
+  /*
+   * Text-like controls: input, textarea, select.
+   *
+   * `text-base` on small screens rather than `text-sm` throughout: iOS Safari
+   * force-zooms the viewport when a focused control's font-size is under 16px,
+   * and it does not zoom back out afterwards. Dropping to 14px from `sm` keeps
+   * the intended density everywhere the zoom rule does not apply.
+   */
   .input {
-    @apply w-full rounded-lg border border-line-strong bg-surface px-3 py-2.5 text-sm text-content
-           placeholder:text-content-subtle focus:border-primary-border;
+    @apply w-full rounded-control border border-line-strong bg-surface px-3 py-2.5 text-base text-content
+           transition-[border-color] duration-150
+           placeholder:text-content-subtle hover:border-content-subtle
+           focus:border-primary-border sm:text-meta;
   }
-  .input-error { @apply border-danger-border-strong; }
-  .label { @apply mb-1.5 block text-sm font-medium text-content-secondary; }
 
-  .card { @apply rounded-xl border border-line bg-surface; }
-  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+  /*
+   * No `select.input` rule here on purpose. Dropdowns use components/Select.jsx
+   * — a real listbox — because a native <select> renders its open list as an OS
+   * popup that CSS cannot style. The `.input` class above still applies to that
+   * component's trigger button, which is what keeps it identical to the text
+   * fields beside it.
+   */
+  .input-error { @apply border-danger-border-strong; }
+  .label { @apply mb-1.5 block text-meta font-medium text-content-secondary; }
+
+  /*
+   * Cards carry a shadow, not only a 1px border — a flat outline on a flat
+   * canvas is most of why a page reads as unfinished. The border stays for
+   * definition in forced-colours mode, where shadows are dropped entirely.
+   */
+  .card { @apply rounded-panel border border-line bg-surface shadow-raised; }
+
+  /* Opt-in lift, for a card that is itself a link or contains the primary
+     action. Responds to focus as well as hover, so keyboard users see it too. */
+  .card-interactive {
+    @apply card transition-[box-shadow,transform] duration-200
+           hover:-translate-y-0.5 hover:shadow-floating
+           focus-within:-translate-y-0.5 focus-within:shadow-floating;
+  }
+
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium; }
 
   /* Admin surface. A touch flatter than .card — the panel is a working
      container in a dense grid, not a product tile that needs to lift. */
-  .admin-panel { @apply rounded-xl border border-line bg-surface shadow-sm; }
+  .admin-panel { @apply rounded-panel border border-line bg-surface shadow-raised; }
 
   /*
    * Status pills.

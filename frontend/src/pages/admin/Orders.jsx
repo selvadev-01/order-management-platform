@@ -61,7 +61,7 @@ function AdvanceButton({ order, onAdvance, busy }) {
   // Delivered is terminal (US-ADMIN-8 AC3).
   if (!next) {
     return (
-      <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium text-success">
+      <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-eyebrow font-medium text-success">
         <CheckIcon className="h-4 w-4" />
         Complete
       </span>
@@ -79,7 +79,7 @@ function AdvanceButton({ order, onAdvance, busy }) {
       type="button"
       onClick={() => onAdvance(order, next)}
       disabled={busy || blocked}
-      className="btn-primary h-9 whitespace-nowrap px-3 py-0 text-xs"
+      className="btn-primary h-9 whitespace-nowrap px-3 py-0 text-eyebrow"
       title={blocked ? 'Payment must be completed first' : `Advance to ${next}`}
       aria-label={`Mark order ${order.id.slice(-8)} as ${next}`}
     >
@@ -210,7 +210,7 @@ export default function Orders() {
           ]}
         />
         {data?.total != null && (
-          <p className="ml-auto text-sm tabular-nums text-content-muted">
+          <p className="ml-auto text-meta tabular-nums text-content-muted">
             {data.total} order{data.total === 1 ? '' : 's'}
           </p>
         )}

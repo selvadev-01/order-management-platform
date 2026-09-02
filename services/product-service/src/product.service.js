@@ -107,13 +107,17 @@ export class ProductService {
   /**
    * Invalidate everything a write could have affected.
    *
-   * Both the specific product key AND the list keys must go — invalidating
+   * Both the specific product keys AND the list keys must go — invalidating
    * only one is the common bug this method exists to prevent
    * (US-ADMIN-2 AC4).
+   *
+   * Variadic because a stock reservation writes several products at once, and
+   * every one of them must lose its cached entry.
    */
-  async invalidateProduct(id) {
+  async invalidateProduct(...ids) {
+    const keys = ids.filter(Boolean).map((id) => cacheKeys.product(String(id)));
     await Promise.all([
-      id ? this.cache.del(cacheKeys.product(String(id))) : Promise.resolve(),
+      keys.length ? this.cache.del(...keys) : Promise.resolve(),
       this.cache.delPattern(cacheKeys.productListPattern()),
     ]);
   }

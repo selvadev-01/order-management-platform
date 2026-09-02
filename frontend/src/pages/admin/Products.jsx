@@ -227,7 +227,7 @@ function StockCell({ product, onSave, busy }) {
           type="button"
           onClick={() => onSave(product.id, draft, () => setDraft(null))}
           disabled={busy}
-          className="btn-primary h-9 px-3 py-0 text-xs"
+          className="btn-primary h-9 px-3 py-0 text-eyebrow"
         >
           {busy && <Spinner />}
           Save
@@ -388,7 +388,7 @@ export default function Products() {
           label="Filter products"
         />
         {data?.total != null && (
-          <p className="ml-auto text-sm tabular-nums text-content-muted">
+          <p className="ml-auto text-meta tabular-nums text-content-muted">
             {items.length} of {all.length} shown · {data.total} total
           </p>
         )}
@@ -437,7 +437,7 @@ export default function Products() {
         * other pages exist.
         */}
       {query && data?.totalPages > 1 && (
-        <p className="mt-6 text-center text-sm text-content-muted">
+        <p className="mt-6 text-center text-meta text-content-muted">
           Filtering this page only — use the pager to search the rest.
         </p>
       )}

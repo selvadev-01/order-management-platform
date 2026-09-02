@@ -62,12 +62,12 @@ export default function Register() {
   };
 
   return (
-    <div className="mx-auto max-w-md py-8">
-      <div className="card p-6 sm:p-8">
-        <h1 className="text-xl font-semibold text-content">Create an account</h1>
-        <p className="mt-1 text-sm text-content-muted">It only takes a moment.</p>
+    <div className="mx-auto max-w-md py-10 sm:py-14">
+      <div className="card p-6 shadow-floating sm:p-8">
+        <h1 className="text-display font-semibold text-content">Create an account</h1>
+        <p className="mt-2 text-body text-content-muted">It only takes a moment.</p>
 
-        <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
+        <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
           <FormError message={formError} />
 
           <div>
@@ -121,7 +121,7 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-hover"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-eyebrow font-medium text-content-secondary hover:bg-surface-hover"
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -129,7 +129,7 @@ export default function Register() {
             {errors.password ? (
               <FieldError id="password-error" message={errors.password} />
             ) : (
-              <p id="password-hint" className="mt-1.5 text-xs text-content-muted">
+              <p id="password-hint" className="mt-1.5 text-eyebrow text-content-muted">
                 At least 8 characters, with upper and lower case letters and a number.
               </p>
             )}
@@ -141,9 +141,9 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-content-secondary">
+        <p className="mt-7 border-t border-line-subtle pt-5 text-center text-meta text-content-secondary">
           Already registered?{' '}
-          <Link to="/login" className="font-medium text-brand-600 hover:underline">
+          <Link to="/login" className="font-semibold text-primary-text hover:underline">
             Sign in
           </Link>
         </p>

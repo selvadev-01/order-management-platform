@@ -43,7 +43,7 @@ export function QuantityStepper({ value, onChange, max, disabled, label = 'Quant
           type="button"
           onClick={() => onChange(clamp(value - 1))}
           disabled={disabled || value <= 1}
-          className="btn-secondary h-11 w-11 p-0 text-lg"
+          className="btn-secondary h-11 w-11 p-0 text-heading"
           aria-label="Decrease quantity"
         >
           −
@@ -69,14 +69,14 @@ export function QuantityStepper({ value, onChange, max, disabled, label = 'Quant
           type="button"
           onClick={() => onChange(clamp(value + 1))}
           disabled={disabled || (max != null && value >= max)}
-          className="btn-secondary h-11 w-11 p-0 text-lg"
+          className="btn-secondary h-11 w-11 p-0 text-heading"
           aria-label="Increase quantity"
         >
           +
         </button>
       </div>
       {notice && (
-        <p className="mt-1.5 text-sm text-warning-text" role="status" aria-live="polite">
+        <p className="mt-1.5 text-meta text-warning-text" role="status" aria-live="polite">
           {notice}
         </p>
       )}
@@ -123,7 +123,7 @@ export default function ProductDetail() {
           <button
             type="button"
             onClick={() => navigate('/cart')}
-            className="shrink-0 text-sm font-medium underline"
+            className="shrink-0 text-meta font-medium underline"
           >
             View cart
           </button>
@@ -142,7 +142,7 @@ export default function ProductDetail() {
   if (state === 'loading') {
     return (
       <div className="grid gap-8 md:grid-cols-2">
-        <div className="aspect-square animate-pulse rounded-xl bg-surface-active" />
+        <div className="aspect-square animate-pulse rounded-panel bg-surface-active" />
         <div className="space-y-4">
           <div className="h-8 w-3/4 animate-pulse rounded bg-surface-active" />
           <div className="h-4 w-full animate-pulse rounded bg-surface-hover" />
@@ -172,7 +172,7 @@ export default function ProductDetail() {
 
   return (
     <div>
-      <nav className="mb-6 text-sm text-content-muted" aria-label="Breadcrumb">
+      <nav className="mb-6 text-meta text-content-muted" aria-label="Breadcrumb">
         <Link to="/products" className="hover:text-content">Products</Link>
         <span className="mx-2" aria-hidden="true">/</span>
         <span className="text-content">{product.name}</span>
@@ -180,7 +180,7 @@ export default function ProductDetail() {
 
       <div className="grid gap-8 md:grid-cols-2">
         <div>
-          <div className="aspect-square overflow-hidden rounded-xl border border-line bg-surface-hover">
+          <div className="aspect-square overflow-hidden rounded-panel border border-line bg-surface-hover">
             {images[activeImage] ? (
               <img src={images[activeImage]} alt={product.name} className="h-full w-full object-cover" />
             ) : (
@@ -199,8 +199,8 @@ export default function ProductDetail() {
                   aria-label={`Show image ${i + 1} of ${images.length}`}
                   onClick={() => setActiveImage(i)}
                   aria-pressed={i === activeImage}
-                  className={`h-16 w-16 overflow-hidden rounded-lg border-2 ${
-                    i === activeImage ? 'border-brand-600' : 'border-line'
+                  className={`h-16 w-16 overflow-hidden rounded-control border-2 ${
+                    i === activeImage ? 'border-primary-border' : 'border-line'
                   }`}
                 >
                   {/* Empty alt: the button already carries the name. */}
@@ -213,13 +213,13 @@ export default function ProductDetail() {
 
         <div>
           {product.category && (
-            <span className="text-xs font-medium uppercase tracking-wide text-brand-600">
+            <span className="text-eyebrow font-medium uppercase tracking-wide text-primary">
               {product.category.name}
             </span>
           )}
-          <h1 className="mt-1 text-2xl font-semibold text-content sm:text-3xl">{product.name}</h1>
+          <h1 className="mt-1 text-display font-semibold text-content">{product.name}</h1>
 
-          <p className="mt-4 text-3xl font-semibold text-content">{formatMoney(product.price)}</p>
+          <p className="mt-4 text-display font-semibold text-content">{formatMoney(product.price)}</p>
 
           <div className="mt-3">
             {outOfStock ? (
@@ -254,7 +254,7 @@ export default function ProductDetail() {
             </button>
 
             {addError && (
-              <p className="text-sm text-danger" role="alert">{addError}</p>
+              <p className="text-meta text-danger" role="alert">{addError}</p>
             )}
           </div>
         </div>

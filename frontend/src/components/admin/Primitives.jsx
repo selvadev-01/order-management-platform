@@ -26,8 +26,8 @@ export function Panel({ title, description, actions, children, bodyClass = 'p-4 
       {(title || actions) && (
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3.5 sm:px-5">
           <div className="min-w-0">
-            {title && <h2 className="text-sm font-semibold text-content">{title}</h2>}
-            {description && <p className="mt-0.5 text-xs text-content-muted">{description}</p>}
+            {title && <h2 className="text-meta font-semibold text-content">{title}</h2>}
+            {description && <p className="mt-0.5 text-eyebrow text-content-muted">{description}</p>}
           </div>
           {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </header>
@@ -42,8 +42,8 @@ export function PageHeader({ title, description, actions }) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3 sm:mb-6">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-content sm:text-2xl">{title}</h1>
-        {description && <p className="mt-1 text-sm text-content-muted">{description}</p>}
+        <h1 className="text-title font-semibold text-content">{title}</h1>
+        {description && <p className="mt-1 text-meta text-content-muted">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
@@ -94,7 +94,7 @@ export function FilterChips({ options, value, onChange, label }) {
             type="button"
             onClick={() => onChange(o.value)}
             aria-pressed={active}
-            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-control border px-3 py-1.5 text-meta font-medium transition ${
               active
                 ? 'border-primary-border bg-primary-soft text-primary-text'
                 : 'border-line-strong bg-surface text-content-secondary hover:bg-surface-sunken'
@@ -139,9 +139,9 @@ export function StatCard({ label, value, hint, icon: IconCmp, tone = Tone.PRIMAR
   return (
     <div className="admin-panel p-4">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-content-muted">{label}</p>
+        <p className="text-eyebrow font-semibold uppercase text-content-muted">{label}</p>
         {IconCmp && (
-          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${TONES[tone]}`}>
+          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-control ${TONES[tone]}`}>
             <IconCmp className="h-4 w-4" />
           </span>
         )}
@@ -151,9 +151,9 @@ export function StatCard({ label, value, hint, icon: IconCmp, tone = Tone.PRIMAR
       ) : (
         // Tabular figures: the numbers sit in a grid and must not jitter as
         // they update.
-        <p className="mt-1.5 text-2xl font-semibold tabular-nums text-content">{value}</p>
+        <p className="mt-1.5 text-title font-semibold tabular-nums text-content">{value}</p>
       )}
-      {hint && !loading && <p className="mt-1 text-xs text-content-muted">{hint}</p>}
+      {hint && !loading && <p className="mt-1 text-eyebrow text-content-muted">{hint}</p>}
     </div>
   );
 }
@@ -195,18 +195,18 @@ export function Modal({ open, onClose, title, description, children, footer, siz
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         tabIndex={-1}
-        className={`admin-panel w-full ${widths[size]} shadow-xl outline-none`}
+        className={`admin-panel w-full ${widths[size]} rounded-overlay shadow-overlay outline-none`}
       >
         <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div>
             <h2 id={titleId} className="font-semibold text-content">{title}</h2>
-            {description && <p id={descId} className="mt-1 text-sm text-content-muted">{description}</p>}
+            {description && <p id={descId} className="mt-1 text-meta text-content-muted">{description}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="-mr-1 -mt-1 cursor-pointer rounded-lg p-1.5 text-content-subtle transition hover:bg-surface-hover hover:text-content-secondary"
+            className="-mr-1 -mt-1 cursor-pointer rounded-control p-1.5 text-content-subtle transition hover:bg-surface-hover hover:text-content-secondary"
           >
             <CloseIcon className="h-5 w-5" />
           </button>
@@ -280,7 +280,7 @@ export function Pagination({ page, totalPages, onChange, hasPrev, hasNext }) {
         <ChevronLeftIcon className="h-4 w-4" />
         Previous
       </button>
-      <p className="text-sm tabular-nums text-content-secondary" aria-live="polite">
+      <p className="text-meta tabular-nums text-content-secondary" aria-live="polite">
         Page {page} of {totalPages}
       </p>
       <button

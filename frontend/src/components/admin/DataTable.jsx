@@ -55,7 +55,7 @@ export default function DataTable({
     <>
       {/* Desktop: a real table, so screen readers announce row/column context. */}
       <div className={`${vis.table} admin-panel overflow-hidden`}>
-        <table className="w-full text-sm">
+        <table className="w-full text-meta">
           {caption && <caption className="sr-only">{caption}</caption>}
           <thead className="border-b border-line bg-surface-sunken">
             <tr>
@@ -63,7 +63,7 @@ export default function DataTable({
                 <th
                   key={c.key}
                   scope="col"
-                  className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-content-muted ${align(c)}`}
+                  className={`px-4 py-3 text-eyebrow font-semibold uppercase tracking-wide text-content-muted ${align(c)}`}
                 >
                   {c.header}
                 </th>
@@ -97,7 +97,7 @@ export default function DataTable({
                   <div key={c.key} className="font-medium text-content">{c.cell(row)}</div>
                 ))}
                 {pick('meta').map((c) => (
-                  <div key={c.key} className="text-xs text-content-muted">{c.cell(row)}</div>
+                  <div key={c.key} className="text-eyebrow text-content-muted">{c.cell(row)}</div>
                 ))}
               </div>
               <div className="shrink-0 text-right">
@@ -135,7 +135,7 @@ export function CellStack({ primary, secondary }) {
   return (
     <div className="min-w-0">
       <span className="block truncate font-medium text-content">{primary}</span>
-      {secondary && <span className="block truncate text-xs text-content-muted">{secondary}</span>}
+      {secondary && <span className="block truncate text-eyebrow text-content-muted">{secondary}</span>}
     </div>
   );
 }
@@ -165,7 +165,7 @@ export function IconButton({ icon: IconCmp, label, onClick, disabled, tone = 'de
       title={label}
       /* 44px on touch, dropping to 36px from lg up — where the table view takes
          over and row density is worth more than an oversized hit area. */
-      className={`grid h-11 w-11 cursor-pointer place-items-center rounded-lg transition disabled:cursor-not-allowed disabled:opacity-40 lg:h-9 lg:w-9 ${tones[tone]}`}
+      className={`grid h-11 w-11 cursor-pointer place-items-center rounded-control transition disabled:cursor-not-allowed disabled:opacity-40 lg:h-9 lg:w-9 ${tones[tone]}`}
     >
       <IconCmp className="h-4 w-4" />
     </button>

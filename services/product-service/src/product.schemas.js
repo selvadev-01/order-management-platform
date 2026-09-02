@@ -73,6 +73,27 @@ export const updateStockSchema = {
   body: z.object({ stock }),
 };
 
+/**
+ * Internal stock reservation (service-to-service).
+ *
+ * A positive quantity reserves (decrements); the release path sends the same
+ * lines back to restore them. Quantities are bounded so a malformed or hostile
+ * payload cannot swing stock arbitrarily.
+ */
+export const reserveStockSchema = {
+  body: z.object({
+    items: z
+      .array(
+        z.object({
+          productId: objectId,
+          quantity: z.coerce.number().int().positive().max(1000),
+        }),
+      )
+      .min(1, 'At least one item is required')
+      .max(100),
+  }),
+};
+
 export const createCategorySchema = {
   body: z.object({
     name: z.string().trim().min(2, 'Name must be at least 2 characters').max(60),

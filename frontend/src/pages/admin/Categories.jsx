@@ -127,7 +127,7 @@ export default function Categories() {
       mobile: 'title',
       cell: (c) => (
         <div className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary-text">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-control bg-primary-soft text-primary-text">
             <CategoriesIcon className="h-4 w-4" />
           </span>
           <span className="font-medium text-content">{c.name}</span>
@@ -138,7 +138,7 @@ export default function Categories() {
       key: 'slug',
       header: 'Slug',
       mobile: 'meta',
-      cell: (c) => <code className="text-xs text-content-muted">{c.slug ?? '—'}</code>,
+      cell: (c) => <code className="text-eyebrow text-content-muted">{c.slug ?? '—'}</code>,
     },
     {
       key: 'products',
@@ -185,7 +185,7 @@ export default function Categories() {
 
       {countsFailed && (
         <div
-          className="mb-4 flex items-center gap-2.5 rounded-lg border border-warning-border bg-warning-soft px-3.5 py-2.5 text-sm text-warning-text"
+          className="mb-4 flex items-center gap-2.5 rounded-control border border-warning-border bg-warning-soft px-3.5 py-2.5 text-meta text-warning-text"
           role="status"
         >
           <AlertIcon className="h-4 w-4 shrink-0" />

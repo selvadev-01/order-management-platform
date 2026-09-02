@@ -11,7 +11,7 @@ import { Spinner } from './States';
 function FullPageLoading() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center" role="status">
-      <Spinner className="h-8 w-8 text-brand-600" />
+      <Spinner className="h-8 w-8 text-primary" />
       <span className="sr-only">Loading</span>
     </div>
   );

@@ -6,13 +6,72 @@
  * cart, so the client displays them rather than calculating money itself —
  * the two can then never disagree (US-CART-1).
  */
-import { notFound, conflict, sumMinor } from '@oms/shared';
+import {
+  notFound,
+  conflict,
+  sumMinor,
+  NotificationEvent,
+  ABANDONED_CART_DELAY_MS,
+} from '@oms/shared';
 import { Cart } from './models/cart.model.js';
 
 export class CartService {
-  constructor({ productClient, logger }) {
+  constructor({ productClient, queue, logger }) {
     this.products = productClient;
+    this.queue = queue;
     this.logger = logger;
+  }
+
+  /**
+   * Abandoned-cart reminder — the delayed background job (docx §7).
+   *
+   * Scheduled on every cart mutation with a fixed job id, so each change
+   * replaces the pending reminder rather than queueing another: the timer
+   * measures inactivity, not the number of edits. Removing the job when the
+   * cart empties or converts is what stops a reminder for a cart that no
+   * longer needs one.
+   */
+  async scheduleAbandonedCartReminder(userId, itemCount) {
+    if (!this.queue) return;
+
+    const jobId = `${NotificationEvent.ABANDONED_CART}-${userId}`;
+    try {
+      // A delayed job is only replaceable once the old one is gone — BullMQ
+      // ignores an add() whose id already exists.
+      const pending = await this.queue.getJob(jobId);
+      if (pending) await pending.remove();
+
+      // An empty cart has nothing to be reminded about.
+      if (itemCount === 0) {
+        this.logger?.debug({ userId }, 'abandoned-cart reminder cancelled — cart empty');
+        return;
+      }
+
+      await this.queue.add(
+        NotificationEvent.ABANDONED_CART,
+        {
+          userId: String(userId),
+          event: NotificationEvent.ABANDONED_CART,
+          // Snapshotted because by delivery time the cart may have changed;
+          // the reminder describes what was left behind when it was scheduled.
+          cart: { itemCount },
+        },
+        { jobId, delay: ABANDONED_CART_DELAY_MS },
+      );
+
+      this.logger?.debug(
+        { userId, itemCount, delayMs: ABANDONED_CART_DELAY_MS },
+        'abandoned-cart reminder scheduled',
+      );
+    } catch (err) {
+      // A queue failure must never fail the cart operation itself.
+      this.logger?.error({ err, userId }, 'failed to schedule abandoned-cart reminder');
+    }
+  }
+
+  /** Cancel a pending reminder — the cart converted to an order. */
+  async cancelAbandonedCartReminder(userId) {
+    await this.scheduleAbandonedCartReminder(userId, 0);
   }
 
   async #getOrCreate(userId) {
@@ -46,6 +105,7 @@ export class CartService {
           return {
             productId,
             name: product.name,
+            image: product.image ?? null,
             unitPrice: product.price,
             quantity: item.quantity,
             lineTotal: product.price * item.quantity,
@@ -64,6 +124,9 @@ export class CartService {
             return {
               productId,
               name: 'Unavailable product',
+              // No image for a product that no longer exists — the UI falls
+              // back to its placeholder rather than showing a broken one.
+              image: null,
               unitPrice: 0,
               quantity: item.quantity,
               lineTotal: 0,
@@ -124,7 +187,19 @@ export class CartService {
     await cart.save();
 
     this.logger?.info({ userId, productId, quantity: combined }, 'cart item added');
-    return this.view(userId, token);
+    return this.#viewAndScheduleReminder(userId, token);
+  }
+
+  /**
+   * Resolve the cart and (re)schedule its abandonment reminder.
+   *
+   * Every mutation funnels through here so no path can change the cart without
+   * the pending reminder being brought back in step with it.
+   */
+  async #viewAndScheduleReminder(userId, token) {
+    const view = await this.view(userId, token);
+    await this.scheduleAbandonedCartReminder(userId, view.itemCount);
+    return view;
   }
 
   /** Set an existing line's quantity, re-validating against live stock. */
@@ -146,7 +221,7 @@ export class CartService {
     await cart.save();
 
     this.logger?.info({ userId, productId, quantity }, 'cart quantity updated');
-    return this.view(userId, token);
+    return this.#viewAndScheduleReminder(userId, token);
   }
 
   /**
@@ -162,10 +237,12 @@ export class CartService {
         this.logger?.info({ userId, productId }, 'cart item removed');
       }
     }
-    return this.view(userId, token);
+    return this.#viewAndScheduleReminder(userId, token);
   }
 
   async clear(userId) {
     await Cart.findOneAndUpdate({ userId }, { items: [] });
+    // The cart is now empty — nothing to be reminded about.
+    await this.cancelAbandonedCartReminder(userId);
   }
 }

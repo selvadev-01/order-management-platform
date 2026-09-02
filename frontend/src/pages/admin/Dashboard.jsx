@@ -155,7 +155,7 @@ export default function Dashboard() {
             title="Recent orders"
             bodyClass="p-0 sm:p-0"
             actions={
-              <Link to="/admin/orders" className="btn-secondary h-9 px-3 py-0 text-xs">
+              <Link to="/admin/orders" className="btn-secondary h-9 px-3 py-0 text-eyebrow">
                 View all
                 <ChevronRightIcon className="h-4 w-4" />
               </Link>
@@ -187,7 +187,7 @@ export default function Dashboard() {
           title="Low stock"
           description={`At or below ${LOW_STOCK} units`}
           actions={
-            <Link to="/admin/products" className="btn-secondary h-9 px-3 py-0 text-xs">
+            <Link to="/admin/products" className="btn-secondary h-9 px-3 py-0 text-eyebrow">
               Restock
             </Link>
           }
@@ -195,7 +195,7 @@ export default function Dashboard() {
           {products.state === 'loading' && (
             <div className="space-y-3" role="status" aria-label="Loading stock levels">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-10 animate-pulse rounded-lg bg-surface-hover" />
+                <div key={i} className="h-10 animate-pulse rounded-control bg-surface-hover" />
               ))}
             </div>
           )}
@@ -208,7 +208,7 @@ export default function Dashboard() {
             <ul className="divide-y divide-line-subtle">
               {lowStock.map((p) => (
                 <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
-                  <span className="min-w-0 truncate text-sm text-content-secondary">{p.name}</span>
+                  <span className="min-w-0 truncate text-meta text-content-secondary">{p.name}</span>
                   {/* Colour plus the word "left" — never colour alone. */}
                   <span className={`${stockBadge(p.stock, { lowAt: LOW_STOCK })} shrink-0 tabular-nums`}>
                     {p.stock === 0 ? 'Out of stock' : `${p.stock} left`}

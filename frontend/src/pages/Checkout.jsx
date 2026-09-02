@@ -234,7 +234,7 @@ export default function Checkout() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold text-content">Checkout</h1>
+      <h1 className="mb-6 text-display font-semibold text-content">Checkout</h1>
 
       <form onSubmit={submit} noValidate>
         <div className="grid gap-6 lg:grid-cols-3">
@@ -269,7 +269,7 @@ export default function Checkout() {
 
               <ul className="mt-4 space-y-3">
                 {cart.items.map((l) => (
-                  <li key={l.productId} className="flex justify-between gap-3 text-sm">
+                  <li key={l.productId} className="flex justify-between gap-3 text-meta">
                     <span className="min-w-0">
                       <span className="block truncate text-content">{l.name}</span>
                       <span className="text-content-muted">Qty {l.quantity}</span>
@@ -281,7 +281,7 @@ export default function Checkout() {
 
               <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
                 <span className="font-semibold text-content">Total</span>
-                <span className="text-xl font-semibold text-content">{formatMoney(cart.total)}</span>
+                <span className="text-title font-semibold text-content">{formatMoney(cart.total)}</span>
               </div>
 
               <button type="submit" disabled={busy || cart.checkoutBlocked} className="btn-primary mt-5 w-full">

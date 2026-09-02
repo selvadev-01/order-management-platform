@@ -12,6 +12,7 @@
  */
 import { useId } from 'react';
 import { FieldError } from '../States';
+import Select from '../Select';
 
 export default function Field({
   label,
@@ -54,19 +55,26 @@ export default function Field({
 
       {as === 'textarea' && <textarea {...shared} />}
 
+      {/* The shared listbox, not a native <select>: its popup is real DOM, so
+          it matches the rest of the product on every platform. It takes the
+          chosen value directly rather than an event. */}
       {as === 'select' && (
-        <select {...shared}>
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <Select
+          id={id}
+          options={options}
+          value={value}
+          onChange={(v) => onChange({ target: { name, value: v } })}
+          invalid={Boolean(error)}
+          aria-describedby={shared['aria-describedby']}
+          disabled={rest.disabled}
+        />
       )}
 
       {as === 'input' && <input {...shared} />}
 
       {/* Hint stays visible rather than living in a placeholder that vanishes
           the moment the user starts typing. */}
-      {hint && !error && <p id={hintId} className="mt-1.5 text-xs text-content-muted">{hint}</p>}
+      {hint && !error && <p id={hintId} className="mt-1.5 text-eyebrow text-content-muted">{hint}</p>}
       <FieldError id={errId} message={error} />
     </div>
   );

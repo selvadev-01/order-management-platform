@@ -12,6 +12,11 @@ const notificationSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
     orderId: { type: mongoose.Schema.Types.ObjectId, default: null },
+    /**
+     * Idempotency key for notifications that have no order to key on.
+     * Null for order-based events, which use orderId instead.
+     */
+    dedupeKey: { type: String, default: null },
     event: {
       type: String,
       enum: Object.values(NotificationEvent),
@@ -58,6 +63,16 @@ notificationSchema.index({ userId: 1, createdAt: -1 });
 notificationSchema.index(
   { userId: 1, event: 1, orderId: 1 },
   { unique: true, partialFilterExpression: { orderId: { $type: 'objectId' } } },
+);
+
+/**
+ * Cart events have no order to key on, so they are deduplicated per user per
+ * day instead: a customer who abandons a cart repeatedly is reminded once a
+ * day, not once per abandonment (US-NOTIF-2 AC4).
+ */
+notificationSchema.index(
+  { userId: 1, event: 1, dedupeKey: 1 },
+  { unique: true, partialFilterExpression: { dedupeKey: { $type: 'string' } } },
 );
 
 export const Notification = mongoose.model('Notification', notificationSchema);

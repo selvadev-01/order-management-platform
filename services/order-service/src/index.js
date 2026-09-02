@@ -56,7 +56,7 @@ async function main() {
     logger,
   });
 
-  const cartService = new CartService({ productClient, logger });
+  const cartService = new CartService({ productClient, queue, logger });
   const orderService = new OrderService({ cartService, productClient, queue, logger });
   const controllers = buildControllers({ cartService, orderService });
 

@@ -13,6 +13,7 @@ import {
   createProductSchema,
   updateProductSchema,
   updateStockSchema,
+  reserveStockSchema,
   createCategorySchema,
 } from './product.schemas.js';
 
@@ -70,6 +71,21 @@ export function buildRoutes({ controllers, config }) {
   );
 
   // --- Internal (service-to-service) --------------------------------------
+  // Registered before /products/:id so 'stock' is not parsed as an id.
+  router.post(
+    '/products/stock/reserve',
+    requireAuth,
+    validate(reserveStockSchema),
+    asyncHandler(controllers.reserveStock),
+  );
+
+  router.post(
+    '/products/stock/release',
+    requireAuth,
+    validate(reserveStockSchema),
+    asyncHandler(controllers.releaseStock),
+  );
+
   router.get(
     '/products/:id/stock',
     requireAuth,

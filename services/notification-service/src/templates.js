@@ -27,18 +27,41 @@ const TEMPLATES = {
     title: 'Order delivered',
     body: 'Your order has been delivered. Thank you for shopping with us.',
   }),
+  /**
+   * Cart-based rather than order-based: at this point no order exists, so the
+   * subject is the cart's own contents.
+   */
+  [NotificationEvent.ABANDONED_CART]: (c) => ({
+    title: 'You left something behind',
+    body:
+      c.itemCount === 1
+        ? 'You still have an item waiting in your cart.'
+        : `You still have ${c.itemCount} items waiting in your cart.`,
+  }),
 };
 
-export function renderNotification(event, order) {
+/** Events whose subject is the cart, not an order. */
+const CART_EVENTS = new Set([NotificationEvent.ABANDONED_CART]);
+
+export function isCartEvent(event) {
+  return CART_EVENTS.has(event);
+}
+
+/**
+ * @param {string} event
+ * @param {object} subject the order, or the cart for cart events
+ */
+export function renderNotification(event, subject) {
   const template = TEMPLATES[event];
   if (!template) return null;
 
-  const { title, body } = template(order ?? {});
+  const { title, body } = template(subject ?? {});
   return {
     title,
     body,
-    // Clicking the notification opens the relevant order (US-NOTIF-5 AC4).
-    url: order?.id ? `/orders/${order.id}` : '/orders',
+    // Clicking the notification opens the relevant page (US-NOTIF-5 AC4):
+    // the cart for a cart event, otherwise the order.
+    url: isCartEvent(event) ? '/cart' : subject?.id ? `/orders/${subject.id}` : '/orders',
   };
 }
 

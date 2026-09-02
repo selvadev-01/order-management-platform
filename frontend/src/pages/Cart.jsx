@@ -4,6 +4,7 @@
  * Prices, totals and availability all come from the server. The client renders
  * them; it never calculates money itself.
  */
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -22,7 +23,7 @@ function IssueNotice({ issue, available }) {
   }[issue];
 
   return (
-    <p className="mt-1.5 flex items-center gap-1.5 text-sm text-warning-text" role="status">
+    <p className="mt-1.5 flex items-center gap-1.5 text-meta text-warning-text" role="status">
       <AlertIcon className="h-4 w-4 shrink-0" />
       {text}
     </p>
@@ -31,24 +32,41 @@ function IssueNotice({ issue, available }) {
 
 function CartLine({ line, pending, onQuantity, onRemove }) {
   const busy = Boolean(pending);
+  // A broken URL should degrade to the placeholder, not a broken-image glyph.
+  const [imageFailed, setImageFailed] = useState(false);
   return (
     <div
       className={`card flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${
         busy ? 'opacity-60' : ''
       } ${!line.available ? 'border-warning-border bg-warning-soft/40' : ''}`}
     >
-      <div className="grid h-16 w-16 shrink-0 place-items-center rounded-lg bg-surface-hover text-content-subtle" aria-hidden="true">
-        <BoxIcon className="h-7 w-7" />
+      {/*
+        * Thumbnail, falling back to the placeholder when the product has no
+        * image, was deleted, or the file 404s. Decorative either way: the line
+        * already names the product, so alt="" avoids announcing it twice.
+        */}
+      <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-control bg-surface-hover text-content-subtle">
+        {line.image && !imageFailed ? (
+          <img
+            src={line.image}
+            alt=""
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <BoxIcon className="h-7 w-7" aria-hidden="true" />
+        )}
       </div>
 
       <div className="min-w-0 flex-1">
         <Link
           to={`/products/${line.productId}`}
-          className="font-medium text-content hover:text-brand-600"
+          className="text-heading font-semibold text-content transition-colors hover:text-primary-text"
         >
           {line.name}
         </Link>
-        <p className="mt-0.5 text-sm text-content-muted">{formatMoney(line.unitPrice)} each</p>
+        <p className="mt-0.5 text-meta text-content-muted">{formatMoney(line.unitPrice)} each</p>
         <IssueNotice issue={line.issue} available={line.availableStock} />
       </div>
 
@@ -58,7 +76,7 @@ function CartLine({ line, pending, onQuantity, onRemove }) {
           type="button"
           onClick={() => onQuantity(line.quantity - 1)}
           disabled={busy || line.quantity <= 1}
-          className="btn-secondary h-11 w-11 p-0 text-lg"
+          className="btn-secondary h-11 w-11 p-0 text-heading"
           aria-label={`Decrease quantity of ${line.name}`}
         >
           −
@@ -71,7 +89,7 @@ function CartLine({ line, pending, onQuantity, onRemove }) {
           type="button"
           onClick={() => onQuantity(line.quantity + 1)}
           disabled={busy || (line.availableStock != null && line.quantity >= line.availableStock)}
-          className="btn-secondary h-11 w-11 p-0 text-lg"
+          className="btn-secondary h-11 w-11 p-0 text-heading"
           aria-label={`Increase quantity of ${line.name}`}
         >
           +
@@ -90,7 +108,7 @@ function CartLine({ line, pending, onQuantity, onRemove }) {
              the same feedback a pointer does. Resting colour is `secondary`,
              not `subtle` — a destructive control should not be the faintest
              thing in the row. */
-          className="grid h-11 w-11 place-items-center rounded-lg text-content-secondary transition hover:bg-danger-soft hover:text-danger active:bg-danger-soft active:text-danger"
+          className="grid h-11 w-11 place-items-center rounded-control text-content-secondary transition hover:bg-danger-soft hover:text-danger active:bg-danger-soft active:text-danger"
           aria-label={`Remove ${line.name} from cart`}
         >
           {busy ? <Spinner /> : <TrashIcon className="h-5 w-5" />}
@@ -126,7 +144,7 @@ export default function Cart() {
   if (loading && cart.items.length === 0) {
     return (
       <div>
-        <h1 className="mb-6 text-2xl font-semibold text-content">Your cart</h1>
+        <h1 className="mb-6 text-display font-semibold text-content">Your cart</h1>
         <LoadingRows count={3} />
       </div>
     );
@@ -137,7 +155,7 @@ export default function Cart() {
   if (error && cart.items.length === 0) {
     return (
       <div>
-        <h1 className="mb-6 text-2xl font-semibold text-content">Your cart</h1>
+        <h1 className="mb-6 text-display font-semibold text-content">Your cart</h1>
         <ErrorState error={error} onRetry={refresh} retrying={loading} />
       </div>
     );
@@ -146,7 +164,7 @@ export default function Cart() {
   if (cart.items.length === 0) {
     return (
       <div>
-        <h1 className="mb-6 text-2xl font-semibold text-content">Your cart</h1>
+        <h1 className="mb-6 text-display font-semibold text-content">Your cart</h1>
         <EmptyState
           icon={CartIcon}
           title="Your cart is empty"
@@ -159,7 +177,7 @@ export default function Cart() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold text-content">Your cart</h1>
+      <h1 className="mb-6 text-display font-semibold text-content">Your cart</h1>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-3 lg:col-span-2">
@@ -176,9 +194,9 @@ export default function Cart() {
 
         <div className="lg:col-span-1">
           <div className="card sticky top-20 p-5">
-            <h2 className="font-semibold text-content">Order summary</h2>
+            <h2 className="text-heading font-semibold text-content">Order summary</h2>
 
-            <dl className="mt-4 space-y-2 text-sm">
+            <dl className="mt-4 space-y-2 text-meta">
               <div className="flex justify-between">
                 <dt className="text-content-secondary">Subtotal</dt>
                 <dd className="font-medium">{formatMoney(cart.subtotal)}</dd>
@@ -192,13 +210,13 @@ export default function Cart() {
             <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
               <span className="font-semibold text-content">Total</span>
               {/* Announced so the financial consequence of a change is heard. */}
-              <span className="text-xl font-semibold text-content" aria-live="polite">
+              <span className="text-title font-semibold text-content" aria-live="polite">
                 {formatMoney(cart.total)}
               </span>
             </div>
 
             {cart.checkoutBlocked && cart.issues.length > 0 && (
-              <div className="mt-4 rounded-lg border border-warning-border bg-warning-soft px-3.5 py-2.5 text-sm text-warning-text" role="alert">
+              <div className="mt-4 rounded-control border border-warning-border bg-warning-soft px-3.5 py-2.5 text-meta text-warning-text" role="alert">
                 Resolve the flagged items before checking out.
               </div>
             )}

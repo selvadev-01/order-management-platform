@@ -109,7 +109,7 @@ export function ToastProvider({ children }) {
 function Toast({ toast, onDismiss, onHold, onRelease }) {
   return (
     <div
-      className={`pointer-events-auto flex items-start gap-3 rounded-lg px-4 py-3 shadow-lg ${
+      className={`pointer-events-auto flex items-start gap-3 rounded-control px-4 py-3 shadow-floating ${
         toast.type === 'error' ? 'bg-danger text-content-inverse' : 'bg-surface-inverse text-content-inverse'
       }`}
       onMouseEnter={() => onHold(toast.id)}
@@ -117,13 +117,13 @@ function Toast({ toast, onDismiss, onHold, onRelease }) {
       onFocus={() => onHold(toast.id)}
       onBlur={() => onRelease(toast.id)}
     >
-      <p className="flex-1 py-2 text-sm">{toast.message}</p>
+      <p className="flex-1 py-2 text-meta">{toast.message}</p>
       {toast.action}
       {/* Sized to a real touch target rather than the glyph's own bounds. */}
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}
-        className="-mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-lg text-content-inverse/70 transition hover:bg-white/10 hover:text-content-inverse"
+        className="-mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-control text-content-inverse/70 transition hover:bg-white/10 hover:text-content-inverse"
         aria-label="Dismiss notification"
       >
         <CloseIcon className="h-4 w-4" />

@@ -16,7 +16,7 @@ import {
 import { Notification } from './models/notification.model.js';
 import { PushSubscription } from './models/subscription.model.js';
 import { PushPreference } from './models/preference.model.js';
-import { renderNotification } from './templates.js';
+import { renderNotification, isCartEvent } from './templates.js';
 
 export class NotificationService {
   constructor({ orderClient, config, logger }) {
@@ -49,29 +49,48 @@ export class NotificationService {
    * means a retry after a partial failure cannot create a second record, so
    * the customer is never notified twice (US-NOTIF-3 AC5).
    */
-  async deliver({ userId, orderId, event }, { token }) {
+  async deliver({ userId, orderId, event, cart }, { token }) {
+    // Cart events have no order to key on, so they deduplicate per user per
+    // day (see the model's partial index).
+    const dedupeKey = isCartEvent(event) ? `${event}:${new Date().toISOString().slice(0, 10)}` : null;
+
     // A record that already succeeded means this job is a repeat.
-    const existing = await Notification.findOne({ userId, orderId, event });
+    const existing = await Notification.findOne(
+      dedupeKey ? { userId, event, dedupeKey } : { userId, orderId, event },
+    );
     if (existing && existing.status === NotificationStatus.SENT) {
       this.logger?.debug({ userId, orderId, event }, 'notification already sent — skipping');
       return { skipped: true, reason: 'already_sent', notificationId: String(existing._id) };
     }
 
-    // Fetch the order for its content. A deleted order is not retryable —
-    // failing fast avoids burning attempts on something that will never
-    // succeed (US-NOTIF-1 edge case).
-    let order = null;
-    try {
-      const res = await this.orders.get(`/api/orders/${orderId}`, { token });
-      order = res.order;
-    } catch (err) {
-      if (err.status === 404) {
-        throw new NonRetryableError(`Order ${orderId} no longer exists`);
+    /**
+     * Resolve what the notification is about.
+     *
+     * Cart events describe a cart that was never ordered, so there is nothing
+     * to fetch — the job payload carries the snapshot. Order events fetch the
+     * order for its live content; a deleted order is not retryable, so failing
+     * fast avoids burning attempts on something that will never succeed
+     * (US-NOTIF-1 edge case).
+     */
+    let subject = null;
+    if (isCartEvent(event)) {
+      subject = cart ?? null;
+      if (!subject) {
+        throw new NonRetryableError(`${event} job is missing its cart payload`);
       }
-      throw err; // 5xx / network — retryable
+    } else {
+      try {
+        const res = await this.orders.get(`/api/orders/${orderId}`, { token });
+        subject = res.order;
+      } catch (err) {
+        if (err.status === 404) {
+          throw new NonRetryableError(`Order ${orderId} no longer exists`);
+        }
+        throw err; // 5xx / network — retryable
+      }
     }
 
-    const content = renderNotification(event, order);
+    const content = renderNotification(event, subject);
     if (!content) {
       throw new NonRetryableError(`Unknown notification event: ${event}`);
     }
@@ -80,7 +99,8 @@ export class NotificationService {
       existing ??
       (await Notification.create({
         userId,
-        orderId,
+        orderId: orderId ?? null,
+        dedupeKey,
         event,
         title: content.title,
         body: content.body,

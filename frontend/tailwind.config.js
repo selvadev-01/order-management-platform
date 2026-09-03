@@ -148,6 +148,30 @@ export default {
       },
 
       /*
+       * Family.
+       *
+       * Geist, self-hosted. The fallback stack is metric-adjacent rather than a
+       * generic `sans-serif`, so a failed or still-loading font degrades to a
+       * similar shape instead of reflowing the page — `font-display: swap` in
+       * the fontsource CSS means that fallback is what renders at first paint,
+       * and the closer it is the smaller the shift when Geist arrives.
+       */
+      fontFamily: {
+        sans: [
+          'Geist Variable',
+          'Geist',
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
+      },
+
+      /*
        * Type scale.
        *
        * Colour was already tokenised; size was not, so 64 `text-sm` and 33

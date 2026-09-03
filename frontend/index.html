@@ -4,6 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Order Management Platform</title>
+    <!-- Paints the browser UI (mobile address bar) to match the active theme. -->
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)" />
+    <script>
+      /*
+       * Resolves the active theme before first paint.
+       *
+       * Inline and synchronous on purpose. Doing this from React would paint
+       * the light default first and repaint dark once the bundle runs, which is
+       * a full-screen white flash for anyone on a dark machine. Blocking on one
+       * localStorage read is much the cheaper trade.
+       *
+       * This writes a concrete 'light' or 'dark' every time, resolving the OS
+       * preference here rather than leaving the attribute unset for a CSS media
+       * query to handle. That keeps styles/tokens.css down to a single dark
+       * trigger and one copy of the palette; see the note there.
+       *
+       * Absence of a stored value is itself meaningful — it means "follow the
+       * OS" — so nothing is written back to storage at this point.
+       */
+      (function () {
+        var stored = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch (e) {
+          /* Private mode or storage blocked by policy: fall back to the OS. */
+        }
+        var theme = stored === 'dark' || stored === 'light'
+          ? stored
+          : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

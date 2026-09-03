@@ -42,6 +42,7 @@ function ProductCard({ product, onAdd, adding }) {
               out ? 'opacity-60 saturate-50' : ''
             }`}
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="grid h-full place-items-center text-content-subtle" aria-hidden="true">
@@ -77,7 +78,9 @@ function ProductCard({ product, onAdd, adding }) {
           <span className="text-title font-semibold tabular-nums text-content">
             {formatMoney(product.price)}
           </span>
-          <span className={`text-eyebrow font-semibold uppercase ${out ? 'text-content-subtle' : 'text-success'}`}>
+          {/* `muted`, not `subtle`: this is the availability status, so it has
+              to clear AA. `subtle` is reserved for decoration. */}
+          <span className={`text-eyebrow font-semibold uppercase ${out ? 'text-content-muted' : 'text-success'}`}>
             {out ? 'Unavailable' : `${product.stock} left`}
           </span>
         </div>
@@ -320,7 +323,13 @@ export default function ProductList() {
 
       {state === 'success' && items.length > 0 && (
         <>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {/* Keyed on the query so the reveal replays when the result set
+              actually changes, rather than only on first mount — paging or
+              filtering otherwise swaps the cards with no acknowledgement. */}
+          <div
+            key={`${search}|${category}|${page}`}
+            className="animate-rise grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
             {items.map((p) => (
               <ProductCard key={p.id} product={p} onAdd={handleAdd} adding={Boolean(pending[p.id])} />
             ))}

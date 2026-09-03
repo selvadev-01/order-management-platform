@@ -48,6 +48,13 @@ const addressSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
+    /**
+     * The customer-facing reference, e.g. `ORD-20260903-0147` (see
+     * order-number.js). Unique, and the only identifier shown in the UI or
+     * quoted to support — `_id` remains the internal key everything else
+     * references.
+     */
+    orderNumber: { type: String, required: true, unique: true },
     userId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
     items: {
       type: [orderItemSchema],

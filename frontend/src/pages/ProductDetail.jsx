@@ -204,7 +204,7 @@ export default function ProductDetail() {
                   }`}
                 >
                   {/* Empty alt: the button already carries the name. */}
-                  <img src={src} alt="" className="h-full w-full object-cover" />
+                  <img src={src} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>

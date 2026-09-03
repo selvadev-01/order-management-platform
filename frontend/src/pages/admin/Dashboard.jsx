@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { api, qs } from '../../services/api';
 import { useFetch } from '../../hooks/useFetch';
-import { formatMoney, formatDateTime, statusClasses } from '../../utils/format';
+import { formatMoney, formatDateTime, formatOrderRef, statusClasses } from '../../utils/format';
 import { Tone, stockBadge } from '../../utils/status';
 import { PageHeader, Panel, StatCard } from '../../components/admin/Primitives';
 import DataTable, { CellStack } from '../../components/admin/DataTable';
@@ -70,7 +70,7 @@ export default function Dashboard() {
       mobile: 'title',
       cell: (o) => (
         <Link to={`/orders/${o.id}`} className="font-medium text-primary hover:underline">
-          #{o.id.slice(-8)}
+          {formatOrderRef(o)}
         </Link>
       ),
     },

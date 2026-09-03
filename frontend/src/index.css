@@ -1,4 +1,21 @@
 /*
+ * Typeface.
+ *
+ * Self-hosted and bundled rather than linked from a CDN: a `<link>` to Google
+ * Fonts costs a third-party connection on the critical path and leaks visitor
+ * IPs to another origin. One variable font, so the whole weight range is a
+ * single file instead of one request per weight.
+ *
+ * No companion mono face. The only thing that would want one is figures, and
+ * the 20 places that display money or counts already carry `tabular-nums`,
+ * which Geist supports — so a second family would cost ~23kB to change nothing.
+ *
+ * Imported before the token and Tailwind layers so `@font-face` is registered
+ * by the time anything resolves `font-sans`.
+ */
+@import '@fontsource-variable/geist/index.css';
+
+/*
  * Tokens must load before Tailwind's base layer, so the variables exist by the
  * time any utility resolves them.
  */
@@ -79,7 +96,7 @@
   .input {
     @apply w-full rounded-control border border-line-strong bg-surface px-3 py-2.5 text-base text-content
            transition-[border-color] duration-150
-           placeholder:text-content-subtle hover:border-content-subtle
+           placeholder:text-content-muted hover:border-content-subtle
            focus:border-primary-border sm:text-meta;
   }
 
@@ -109,6 +126,44 @@
   }
 
   .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium; }
+
+  /*
+   * Entry motion for content that arrives after a fetch.
+   *
+   * Results currently replace a skeleton in a single frame, which reads as a
+   * flinch rather than as the page settling. A short rise softens the swap and,
+   * more usefully, signals that what appeared is *new* — the same reason a
+   * toast slides in rather than blinking.
+   *
+   * Deliberately not staggered per card. A cascade across a 12-item grid means
+   * the last item lands ~600ms after the first, which turns a completed load
+   * into a wait. One movement for the whole grid keeps the cue without the
+   * cost.
+   *
+   * `will-change` is absent on purpose: this runs once on mount, and promoting
+   * every card to its own layer for a 240ms transform costs more than it saves.
+   *
+   * Only `transform` and `opacity` animate, so this stays off the main thread.
+   * The global `prefers-reduced-motion` block above already collapses the
+   * duration to ~0, so no separate guard is needed here.
+   */
+  .animate-rise {
+    animation: rise 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@layer components {
 
   /* Admin surface. A touch flatter than .card — the panel is a working
      container in a dense grid, not a product tile that needs to lift. */

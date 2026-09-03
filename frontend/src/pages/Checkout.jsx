@@ -162,6 +162,7 @@ export default function Checkout() {
       amount: payment.amount,
       currency: payment.currency,
       orderId: order.id,
+      orderRef: order.orderNumber,
       customer: { name: form.name, email: form.email, phone: form.phone },
     });
 

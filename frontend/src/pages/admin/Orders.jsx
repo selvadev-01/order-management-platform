@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import { api, qs } from '../../services/api';
 import { useFetch } from '../../hooks/useFetch';
 import { useToast } from '../../context/ToastContext';
-import { formatMoney, formatDateTime, statusClasses } from '../../utils/format';
+import { formatMoney, formatDateTime, formatOrderRef, statusClasses } from '../../utils/format';
 import { Spinner, EmptyState } from '../../components/States';
 import { PageHeader, Toolbar, FilterChips, Pagination } from '../../components/admin/Primitives';
 import DataTable, { CellStack, CellActions } from '../../components/admin/DataTable';
@@ -81,7 +81,7 @@ function AdvanceButton({ order, onAdvance, busy }) {
       disabled={busy || blocked}
       className="btn-primary h-9 whitespace-nowrap px-3 py-0 text-eyebrow"
       title={blocked ? 'Payment must be completed first' : `Advance to ${next}`}
-      aria-label={`Mark order ${order.id.slice(-8)} as ${next}`}
+      aria-label={`Mark order ${formatOrderRef(order)} as ${next}`}
     >
       {busy ? <Spinner /> : <ChevronRightIcon className="h-4 w-4" />}
       {`Mark ${next}`}
@@ -107,7 +107,7 @@ export default function Orders() {
     setBusyId(order.id);
     try {
       await api.patch(`/api/orders/${order.id}/status`, { status: next });
-      toast.success(`Order ${order.id.slice(-8)} marked ${next}`);
+      toast.success(`Order ${formatOrderRef(order)} marked ${next}`);
       refetch();
     } catch (err) {
       toast.error(err.message);
@@ -119,14 +119,14 @@ export default function Orders() {
   const columns = [
     {
       key: 'id',
-      header: 'Order ID',
+      header: 'Order',
       mobile: 'title',
       cell: (o) => (
         <Link
           to={`/orders/${o.id}`}
           className="font-medium tabular-nums text-primary hover:underline"
         >
-          #{o.id.slice(-8)}
+          {formatOrderRef(o)}
         </Link>
       ),
     },

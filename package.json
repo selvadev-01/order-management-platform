@@ -30,6 +30,7 @@
     "dev:worker": "npm run dev --workspace notification-worker",
     "dev:frontend": "npm run dev --workspace frontend",
     "seed": "node scripts/seed.js",
+    "backfill:order-numbers": "node scripts/backfill-order-numbers.js",
     "lint": "eslint .",
     "test": "npm run test --workspaces --if-present"
   },

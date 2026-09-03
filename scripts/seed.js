@@ -67,9 +67,20 @@ const productSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+/**
+ * Orders are never seeded — they are created by using the app. This model
+ * exists only so the seed can establish the `orderNumber` constraint on a
+ * fresh database (see `seedOrderNumbers`).
+ */
+const orderSchema = new mongoose.Schema(
+  { orderNumber: String },
+  { strict: false, collection: 'orders' },
+);
+
 const User = mongoose.model('User', userSchema);
 const Category = mongoose.model('Category', categorySchema);
 const Product = mongoose.model('Product', productSchema);
+const Order = mongoose.model('Order', orderSchema);
 
 const CATEGORIES = [
   { name: 'Audio & Wearables', slug: 'audio-wearables' },
@@ -198,6 +209,34 @@ async function seedCatalogue() {
   }
 }
 
+/**
+ * Prepare the order-number constraint (see README "Two order identifiers").
+ *
+ * The seed creates no orders, but it is the step that readies a database, and
+ * a database without this index can let two orders share a customer-facing
+ * reference. Creating it here means a fresh install is correct after `npm run
+ * seed` alone, with no second command to remember.
+ *
+ * Existing orders written before order numbers existed are NOT numbered here —
+ * that is `npm run backfill:order-numbers`, which is deliberately separate
+ * because it rewrites live data. The index build is what would fail on such a
+ * database, so it is reported as a clear instruction rather than a stack trace.
+ */
+async function seedOrderNumbers() {
+  const unnumbered = await Order.countDocuments({ orderNumber: { $in: [null, ''] } });
+
+  if (unnumbered > 0) {
+    logger.warn(
+      { unnumbered },
+      'orders without an order number found — run `npm run backfill:order-numbers`, then re-run the seed',
+    );
+    return;
+  }
+
+  await Order.collection.createIndex({ orderNumber: 1 }, { unique: true });
+  logger.info('order number index ensured');
+}
+
 async function main() {
   await mongoose.connect(requireEnv('MONGODB_URI', MONGODB_URI), {
     serverSelectionTimeoutMS: 5000,
@@ -206,6 +245,7 @@ async function main() {
 
   await seedUsers(BCRYPT_SALT_ROUNDS);
   await seedCatalogue();
+  await seedOrderNumbers();
 
   const [users, categories, products, outOfStock] = await Promise.all([
     User.countDocuments(),

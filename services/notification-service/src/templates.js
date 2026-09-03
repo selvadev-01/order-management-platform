@@ -6,26 +6,33 @@
  */
 import { NotificationEvent, formatMoney } from '@oms/shared';
 
+/**
+ * The customer-facing reference, as ` ORD-20260903-0147` ready to append to a
+ * sentence. Empty for an order predating order numbers, so the wording stays
+ * grammatical either way.
+ */
+const ref = (o) => (o?.orderNumber ? ` ${o.orderNumber}` : '');
+
 const TEMPLATES = {
   [NotificationEvent.ORDER_PLACED]: (o) => ({
     title: 'Order placed successfully',
-    body: `Your order for ${formatMoney(o.totalAmount)} has been received and is awaiting payment.`,
+    body: `Your order${ref(o)} for ${formatMoney(o.totalAmount)} has been received and is awaiting payment.`,
   }),
   [NotificationEvent.PAYMENT_SUCCESSFUL]: (o) => ({
     title: 'Payment successful',
-    body: `We have received your payment of ${formatMoney(o.totalAmount)}. Your order is confirmed.`,
+    body: `We have received your payment of ${formatMoney(o.totalAmount)}. Your order${ref(o)} is confirmed.`,
   }),
-  [NotificationEvent.ORDER_CONFIRMED]: () => ({
+  [NotificationEvent.ORDER_CONFIRMED]: (o) => ({
     title: 'Order confirmed',
-    body: 'Your order has been confirmed and is being prepared.',
+    body: `Your order${ref(o)} has been confirmed and is being prepared.`,
   }),
-  [NotificationEvent.ORDER_SHIPPED]: () => ({
+  [NotificationEvent.ORDER_SHIPPED]: (o) => ({
     title: 'Order shipped',
-    body: 'Your order is on its way.',
+    body: `Your order${ref(o)} is on its way.`,
   }),
-  [NotificationEvent.ORDER_DELIVERED]: () => ({
+  [NotificationEvent.ORDER_DELIVERED]: (o) => ({
     title: 'Order delivered',
-    body: 'Your order has been delivered. Thank you for shopping with us.',
+    body: `Your order${ref(o)} has been delivered. Thank you for shopping with us.`,
   }),
   /**
    * Cart-based rather than order-based: at this point no order exists, so the

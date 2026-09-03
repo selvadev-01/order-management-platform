@@ -60,8 +60,11 @@ export class PaymentService {
     const created = await this.gateway.createOrder({
       amount: order.totalAmount,
       currency: order.currency ?? 'INR',
-      receipt: `order_${orderId}`,
-      notes: { orderId: String(orderId) },
+      // The receipt is what a human reads on the gateway dashboard when
+      // reconciling, so it carries the customer-facing reference. `notes` keeps
+      // the internal id for programmatic correlation.
+      receipt: order.orderNumber ?? `order_${orderId}`,
+      notes: { orderId: String(orderId), orderNumber: order.orderNumber ?? '' },
     });
 
     const payment = await Payment.create({

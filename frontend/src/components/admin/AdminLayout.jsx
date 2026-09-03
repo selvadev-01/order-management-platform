@@ -20,16 +20,16 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useAuth } from '../../context/AuthContext';
 import { useDialogBehavior } from '../../hooks/useDialogBehavior';
 import {
-  DashboardIcon, ProductsIcon, CategoriesIcon, OrdersIcon, QueueIcon,
+  DashboardIcon, ProductsIcon, CategoriesIcon, OrdersIcon,
   MenuIcon, CloseIcon, LogoutIcon, StorefrontIcon, ChevronRightIcon,
 } from '../Icons';
+import ThemeToggle from '../ThemeToggle';
 
 const NAV = [
   { to: '/admin', end: true, label: 'Dashboard', icon: DashboardIcon },
   { to: '/admin/products', label: 'Products', icon: ProductsIcon },
   { to: '/admin/categories', label: 'Categories', icon: CategoriesIcon },
   { to: '/admin/orders', label: 'Orders', icon: OrdersIcon },
-  { to: '/admin/queue', label: 'Queue', icon: QueueIcon },
 ];
 
 function navClass({ isActive }) {
@@ -112,6 +112,8 @@ function TopBar({ user, onOpenMenu, drawerOpen, onLogout }) {
           <StorefrontIcon className="h-4 w-4" />
           Storefront
         </Link>
+
+        <ThemeToggle />
 
         {/* Identity, always visible rather than only at the foot of the rail. */}
         <span

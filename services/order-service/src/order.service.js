@@ -16,6 +16,7 @@ import {
   sumMinor,
 } from '@oms/shared';
 import { Order } from './models/order.model.js';
+import { generateOrderNumber } from './order-number.js';
 
 export class OrderService {
   constructor({ cartService, productClient, queue, logger }) {
@@ -73,7 +74,18 @@ export class OrderService {
 
     let order;
     try {
+      /**
+       * Inside the try because it touches the database too: a counter failure
+       * must release the reservation exactly as a failed write does, or stock
+       * stays held for an order that was never created.
+       *
+       * A number burnt by a failed create is harmless — the sequence is a
+       * reference, not an audited count, so gaps carry no meaning.
+       */
+      const orderNumber = await generateOrderNumber();
+
       order = await Order.create({
+        orderNumber,
         userId,
         items,
         totalAmount,
@@ -95,7 +107,7 @@ export class OrderService {
     await this.carts.clear(userId);
 
     this.logger?.info(
-      { orderId: String(order._id), userId, totalAmount, items: items.length },
+      { orderId: String(order._id), orderNumber: order.orderNumber, userId, totalAmount, items: items.length },
       'order created',
     );
 
@@ -332,6 +344,7 @@ export class OrderService {
 function summarise(o) {
   return {
     id: String(o._id),
+    orderNumber: o.orderNumber,
     totalAmount: o.totalAmount,
     currency: o.currency,
     orderStatus: o.orderStatus,
@@ -353,6 +366,7 @@ function adminSummary(o) {
 function detail(o) {
   return {
     id: String(o._id),
+    orderNumber: o.orderNumber,
     userId: String(o.userId),
     items: o.items.map((i) => ({
       productId: String(i.productId),

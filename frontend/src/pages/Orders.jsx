@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api, qs } from '../services/api';
 import { useFetch } from '../hooks/useFetch';
-import { formatMoney, formatDateTime, statusClasses } from '../utils/format';
+import { formatMoney, formatDateTime, formatOrderRef, statusClasses } from '../utils/format';
 import { LoadingRows, EmptyState, ErrorState, Spinner } from '../components/States';
 import { pushSupport, permissionState, currentSubscription, enablePush } from '../services/push';
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
@@ -61,7 +61,7 @@ export default function Orders() {
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-medium text-content">Order {o.id.slice(-8)}</p>
+                    <p className="font-medium tabular-nums text-content">{formatOrderRef(o)}</p>
                     <p className="mt-0.5 text-meta text-content-muted">
                       {formatDateTime(o.createdAt)} · {o.itemCount} item{o.itemCount === 1 ? '' : 's'}
                     </p>

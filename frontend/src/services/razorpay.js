@@ -61,7 +61,7 @@ export function loadRazorpay() {
  *   `success` means the customer completed the gateway flow — NOT that the
  *   payment is verified. The caller must poll the server for real status.
  */
-export function openCheckout({ keyId, gatewayOrderId, amount, currency, customer, orderId }) {
+export function openCheckout({ keyId, gatewayOrderId, amount, currency, customer, orderId, orderRef }) {
   return new Promise((resolve) => {
     const rzp = new window.Razorpay({
       key: keyId,
@@ -69,7 +69,9 @@ export function openCheckout({ keyId, gatewayOrderId, amount, currency, customer
       amount,
       currency,
       name: 'Order Management Platform',
-      description: `Order ${orderId}`,
+      // The customer reads this in the gateway modal, so it shows the readable
+      // reference; `orderId` stays the internal correlation value.
+      description: `Order ${orderRef ?? orderId}`,
       prefill: {
         name: customer?.name ?? '',
         email: customer?.email ?? '',

@@ -198,7 +198,10 @@ export default function Select({
           invalid ? 'input-error' : ''
         } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
       >
-        <span className={`truncate ${selected ? '' : 'text-content-subtle'}`}>
+        {/* The placeholder is real text a user must read to know what this
+            control does, so it takes `muted` (which clears AA) rather than the
+            decorative `subtle`. */}
+        <span className={`truncate ${selected ? '' : 'text-content-muted'}`}>
           {selected ? selected.label : placeholder}
         </span>
         <ChevronDownIcon

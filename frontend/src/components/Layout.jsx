@@ -9,6 +9,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { BellIcon, CartIcon, CloseIcon, MenuIcon, StorefrontIcon } from './Icons';
+import ThemeToggle from './ThemeToggle';
 
 function navClass({ isActive }) {
   return `rounded-control px-3 py-2 text-meta font-medium transition ${
@@ -65,6 +66,8 @@ export default function Layout() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
+
             {isAuthenticated && (
               <Link
                 to="/notifications"

@@ -93,11 +93,20 @@ export default function Categories() {
   const [creating, setCreating] = useState(false);
 
   const categories = useFetch(({ signal }) => api.get('/api/categories', { signal }), []);
-  // A wide page of products, purely to count how many sit in each category.
-  const products = useFetch(
-    ({ signal }) => api.get(`/api/products/admin/all${qs({ page: 1, limit: 200 })}`, { signal }),
-    [],
-  );
+  // Products are fetched purely to count how many sit in each category. The
+  // server caps `limit` at MAX_PAGE_SIZE (100), so a single wide page would
+  // both 400 and — once raised — undercount past the cap. Walking the pages
+  // keeps the counts correct for any catalogue size.
+  const products = useFetch(async ({ signal }) => {
+    const first = await api.get(`/api/products/admin/all${qs({ page: 1, limit: 100 })}`, { signal });
+    const items = [...(first.items ?? [])];
+    const totalPages = first.totalPages ?? 1;
+    for (let page = 2; page <= totalPages; page += 1) {
+      const next = await api.get(`/api/products/admin/all${qs({ page, limit: 100 })}`, { signal });
+      items.push(...(next.items ?? []));
+    }
+    return { ...first, items };
+  }, []);
 
   const rows = useMemo(() => {
     const list = categories.data?.categories ?? [];

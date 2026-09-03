@@ -26,6 +26,19 @@ export function formatDateTime(value, { locale = 'en-IN' } = {}) {
 }
 
 /**
+ * The customer-facing order reference, e.g. `ORD-20260903-0147`.
+ *
+ * Falls back to the truncated `_id` only for orders written before order
+ * numbers existed and not covered by the backfill — every order the backfill
+ * touched has a real number. Takes the whole order, not a string, so no caller
+ * has to remember which field to reach for.
+ */
+export function formatOrderRef(order) {
+  if (!order) return '—';
+  return order.orderNumber ?? `#${String(order.id ?? '').slice(-8)}`;
+}
+
+/**
  * Badge classes per order/payment status. Never colour alone — always paired
  * with the status text.
  *

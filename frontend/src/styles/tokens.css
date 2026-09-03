@@ -17,31 +17,74 @@
  * Values are stored as bare `R G B` channels rather than hex, so Tailwind can
  * apply opacity modifiers to them — `bg-surface/75` needs to inject an alpha
  * into `rgb(...)`, which a hex string cannot accept.
+ *
+ * THEMING
+ *
+ * The semantic layer is declared twice: once on `:root` (light) and once under
+ * the dark selector. Primitives are never redeclared — a theme is a different
+ * set of *pointers* into the same ramp, which is the whole reason the
+ * indirection exists. No component changes to support a theme.
+ *
+ * The dark block is scoped to `:root:not([data-theme='light'])` inside the
+ * media query, plus `:root[data-theme='dark']` outside it. That ordering lets
+ * an explicit choice win in both directions while an unset preference still
+ * follows the OS.
  */
 
 @layer base {
   :root {
     /* ---------------------------------------------------------- primitives */
 
-    /* Brand — the product's blue. */
-    --palette-brand-50:  238 244 255;
-    --palette-brand-100: 217 228 255;
-    --palette-brand-500:  79 110 247;
-    --palette-brand-600:  59  85 224;
-    --palette-brand-700:  47  67 184;
-    --palette-brand-900:  30  42 112;
+    /*
+     * Brand — deep teal.
+     *
+     * Deliberately not the default SaaS indigo. It also leans blue rather than
+     * yellow-green, which keeps it separable from `success` (a true green) when
+     * a primary button sits beside an order-status pill — the one place in this
+     * product where confusing "brand" with "this went well" would actually
+     * mislead someone.
+     */
+    --palette-brand-50:  236 248 246;
+    --palette-brand-100: 204 235 231;
+    --palette-brand-500:  17 140 128;
+    --palette-brand-600:  13 115 107;
+    --palette-brand-700:  12  92  87;
+    --palette-brand-900:  10  56  54;
 
-    /* Neutral — surfaces, text, borders. */
-    --palette-neutral-50:  248 250 252;
-    --palette-neutral-100: 241 245 249;
-    --palette-neutral-200: 226 232 240;
-    --palette-neutral-300: 203 213 225;
-    --palette-neutral-400: 148 163 184;
-    --palette-neutral-500: 100 116 139;
-    --palette-neutral-600:  71  85 105;
-    --palette-neutral-700:  51  65  85;
-    --palette-neutral-800:  30  41  59;
-    --palette-neutral-900:  15  23  42;
+    /* Dark-theme brand steps. Lifted in lightness and slightly desaturated:
+       the light ramp's 600 fails contrast against a dark canvas, and full
+       saturation vibrates on dark backgrounds. */
+    --palette-brand-d-400: 66 199 183;
+    --palette-brand-d-500: 45 178 164;
+    --palette-brand-d-600: 30 150 139;
+    --palette-brand-d-soft: 16  52  50;
+
+    /*
+     * Neutral — surfaces, text, borders.
+     *
+     * Warmed off the previous cool slate: these carry a touch of red/yellow so
+     * product photography sits on the page instead of floating on cold blue.
+     */
+    --palette-neutral-50:  250 250 249;
+    --palette-neutral-100: 245 245 243;
+    --palette-neutral-200: 231 230 227;
+    --palette-neutral-300: 213 211 206;
+    --palette-neutral-400: 162 160 153;
+    --palette-neutral-500: 114 112 106;
+    --palette-neutral-600:  83  81  76;
+    --palette-neutral-700:  62  60  57;
+    --palette-neutral-800:  41  40  38;
+    --palette-neutral-900:  28  27  26;
+
+    /* Dark-theme surface ramp. Not a reversal of the light ramp: dark UI needs
+       its own compressed set of near-blacks, since inverting `neutral-50` gives
+       a muddy grey rather than a usable canvas. Never pure #000. */
+    --palette-ink-950: 20 20 19;
+    --palette-ink-900: 28 28 27;
+    --palette-ink-850: 35 35 33;
+    --palette-ink-800: 44 44 42;
+    --palette-ink-700: 58 57 55;
+    --palette-ink-600: 79 78 75;
 
     /* Status hues. */
     --palette-red-50:   254 242 242;
@@ -75,6 +118,48 @@
 
     --palette-white: 255 255 255;
 
+    /*
+     * Dark-theme status hues.
+     *
+     * Two moves per hue: the `soft` background becomes a desaturated *dark*
+     * tint of the hue rather than a pale wash, and the text becomes a light
+     * tint. Reusing the light pairs here would put near-black text on a
+     * near-white pill in the middle of a dark page — the most common way a
+     * retrofitted dark mode breaks.
+     */
+    /*
+     * The 600 step is darker than the light theme's red rather than lighter,
+     * which looks backwards until you check it: this is a *button fill* carrying
+     * white text, so it is bound by contrast against its own label (5.2:1), not
+     * against the page. The brighter red that reads better against a dark canvas
+     * only manages 4.0:1 under white text, which is a fail on the one control
+     * where misreading the label deletes something.
+     */
+    --palette-d-red-soft:   66  30  30;
+    --palette-d-red-text:  252 165 165;
+    --palette-d-red-500:   225  72  72;
+    --palette-d-red-600:   200  55  55;
+    --palette-d-red-border: 110 45 45;
+
+    /* Muted-but-legible grey for placeholders and de-emphasised figures.
+       Lighter than the light theme's equivalent step so it still clears 4.5:1
+       against a near-black surface. */
+    --palette-ink-subtle: 138 136 129;
+
+    --palette-d-amber-soft:  66  49  17;
+    --palette-d-amber-text: 253 214 137;
+    --palette-d-amber-border: 116 84 30;
+
+    --palette-d-green-soft:  22  56  38;
+    --palette-d-green-text: 134 222 168;
+
+    --palette-d-blue-soft:   26  47  79;
+    --palette-d-blue-text:  158 197 253;
+    --palette-d-indigo-soft: 40  42  86;
+    --palette-d-indigo-text:175 178 252;
+    --palette-d-cyan-soft:   18  56  66;
+    --palette-d-cyan-text:  134 216 233;
+
     /* ------------------------------------------------------------ semantic */
 
     /* Surfaces, back to front. */
@@ -89,7 +174,19 @@
     --color-surface-inverse-hover: var(--palette-neutral-800);
     --color-surface-inverse-muted: var(--palette-neutral-700);
 
-    /* Text, strongest to weakest. */
+    /*
+     * Text, strongest to weakest.
+     *
+     * `subtle` is the one step that does NOT clear WCAG AA for body text
+     * (2.6:1 on surface). That is deliberate — it is the decorative tier, for
+     * chevrons, empty-state glyphs, the search icon inside a field, an em-rule
+     * standing in for a missing value. Anything a user has to *read* takes
+     * `muted` or stronger.
+     *
+     * Darkening `subtle` to pass AA was the obvious alternative and was
+     * rejected: at 4.5:1 it is indistinguishable from `muted`, which collapses
+     * two tiers into one and removes the reason the step exists.
+     */
     --color-text:            var(--palette-neutral-900);
     --color-text-secondary:  var(--palette-neutral-600);
     --color-text-muted:      var(--palette-neutral-500);
@@ -162,4 +259,120 @@
        foreground, per the modal-legibility guidance. */
     --color-scrim:           var(--palette-neutral-900);
   }
+
+  /*
+   * ---------------------------------------------------------------- dark
+   *
+   * Semantic roles only. Every primitive above is untouched, and no component
+   * is aware this block exists.
+   *
+   * Two things here are re-pointings rather than inversions, and both matter:
+   *
+   *   1. `surface-inverse` (the admin sidebar) gets *lighter* than the canvas,
+   *      not darker. Its job is "a surface that contrasts with the page"; on a
+   *      dark page that means lifting. Flipping it to near-black would make the
+   *      sidebar vanish into the background.
+   *
+   *   2. Elevation stops being carried by shadow — shadows are close to
+   *      invisible on dark surfaces — and is carried by surface lightness
+   *      instead, which is why `surface` sits above `canvas` here while the two
+   *      are nearly equal in light mode.
+   */
+  /*
+   * The dark palette, declared once.
+   *
+   * Two things must trigger it: an explicit `data-theme="dark"`, and an unset
+   * preference on a machine that asks for dark. An earlier revision gave each
+   * its own block and the two immediately drifted — a contrast fix landed in
+   * one copy and not the other, silently, because nothing verifies that fifty
+   * paired declarations still agree.
+   *
+   * So there is one trigger, not two: `data-theme` is always present and always
+   * resolved. The OS preference is read in JavaScript (the inline script in
+   * index.html, before first paint, and the matchMedia listener in
+   * hooks/useTheme.js afterwards) and written to the attribute, rather than
+   * being a second condition CSS has to describe independently.
+   *
+   * The cost is that the theme now depends on that script running. It is
+   * inline, synchronous, and in <head>, so it runs for anyone executing the
+   * app's JavaScript at all — and this is a React SPA, so a visitor without
+   * JavaScript has no page to theme.
+   */
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+
+    --color-canvas:          var(--palette-ink-950);
+    --color-surface:         var(--palette-ink-900);
+    --color-surface-sunken:  var(--palette-ink-850);
+    --color-surface-hover:   var(--palette-ink-800);
+    --color-surface-active:  var(--palette-ink-700);
+
+    --color-surface-inverse:       var(--palette-ink-850);
+    --color-surface-inverse-hover: var(--palette-ink-700);
+    --color-surface-inverse-muted: var(--palette-ink-600);
+
+    --color-text:            var(--palette-neutral-50);
+    --color-text-secondary:  var(--palette-neutral-300);
+    --color-text-muted:      var(--palette-neutral-400);
+    --color-text-subtle:     var(--palette-ink-subtle);
+    --color-text-inverse:    var(--palette-neutral-50);
+    --color-text-on-inverse:       var(--palette-neutral-300);
+    --color-text-on-inverse-muted: var(--palette-neutral-400);
+
+    --color-border:          var(--palette-ink-800);
+    --color-border-strong:   var(--palette-ink-700);
+    --color-border-subtle:   var(--palette-ink-850);
+    --color-border-inverse:  var(--palette-ink-700);
+
+    --color-primary:         var(--palette-brand-d-500);
+    --color-primary-hover:   var(--palette-brand-d-400);
+    --color-primary-soft:    var(--palette-brand-d-soft);
+    --color-primary-text:    var(--palette-brand-d-400);
+    --color-primary-border:  var(--palette-brand-d-600);
+    /* Dark text on the light teal button: white on this accent is only ~2.4:1,
+       so the label colour flips rather than the button dimming. */
+    --color-on-primary:      var(--palette-ink-950);
+
+    --color-danger:          var(--palette-d-red-600);
+    --color-danger-hover:    var(--palette-d-red-500);
+    --color-danger-soft:     var(--palette-d-red-soft);
+    --color-danger-soft-alt: var(--palette-d-red-soft);
+    --color-danger-text:     var(--palette-d-red-text);
+    --color-danger-strong:   var(--palette-d-red-500);
+    --color-danger-border:   var(--palette-d-red-border);
+    --color-danger-border-strong: var(--palette-d-red-500);
+    --color-on-danger:       var(--palette-white);
+
+    --color-warning:         var(--palette-amber-500);
+    --color-warning-soft:    var(--palette-d-amber-soft);
+    --color-warning-soft-alt:var(--palette-d-amber-soft);
+    --color-warning-text:    var(--palette-d-amber-text);
+    --color-warning-text-strong: var(--palette-d-amber-text);
+    --color-warning-border:  var(--palette-d-amber-border);
+
+    --color-success:         var(--palette-d-green-text);
+    --color-success-soft:    var(--palette-d-green-soft);
+    --color-success-soft-alt:var(--palette-d-green-soft);
+    --color-success-text:    var(--palette-d-green-text);
+
+    --color-info:            var(--palette-d-blue-text);
+    --color-info-soft:       var(--palette-d-blue-soft);
+
+    --color-stage-shipped-soft:    var(--palette-d-blue-soft);
+    --color-stage-shipped-text:    var(--palette-d-blue-text);
+    --color-stage-processing-soft: var(--palette-d-indigo-soft);
+    --color-stage-processing-text: var(--palette-d-indigo-text);
+    --color-stage-confirmed-soft:  var(--palette-d-cyan-soft);
+    --color-stage-confirmed-text:  var(--palette-d-cyan-text);
+
+    --color-neutral-soft:    var(--palette-ink-800);
+    --color-neutral-text:    var(--palette-neutral-300);
+
+    --color-ring:            var(--palette-brand-d-400);
+
+    /* Pure black, so the scrim still reads as a scrim over a dark page. */
+    --color-scrim:           0 0 0;
+  }
+
+
 }

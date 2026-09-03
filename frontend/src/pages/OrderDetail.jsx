@@ -12,7 +12,7 @@ import { useFetch } from '../hooks/useFetch';
 import { loadRazorpay, openCheckout } from '../services/razorpay';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { formatMoney, formatDateTime, statusClasses } from '../utils/format';
+import { formatMoney, formatDateTime, formatOrderRef, statusClasses } from '../utils/format';
 import { ErrorState, EmptyState, Spinner } from '../components/States';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { CheckIcon, ChevronRightIcon, SearchIcon } from '../components/Icons';
@@ -53,7 +53,7 @@ function AdminStatusPanel({ order, onAdvance, busy }) {
           disabled={busy || blocked}
           className="btn-primary"
           title={blocked ? 'Payment must be completed first' : `Advance to ${next}`}
-          aria-label={`Mark order ${order.id.slice(-8)} as ${next}`}
+          aria-label={`Mark order ${formatOrderRef(order)} as ${next}`}
         >
           {busy ? <Spinner /> : <ChevronRightIcon className="h-4 w-4" />}
           {`Mark ${next}`}
@@ -116,7 +116,7 @@ export default function OrderDetail() {
   const order = data?.order;
 
   // Same short form the heading shows, so the tab and the page agree.
-  useDocumentTitle(order ? `Order ${order.id.slice(-8)}` : 'Order');
+  useDocumentTitle(order ? `Order ${formatOrderRef(order)}` : 'Order');
 
   /**
    * Poll while the webhook settles.
@@ -154,7 +154,7 @@ export default function OrderDetail() {
     setAdvancing(true);
     try {
       await api.patch(`/api/orders/${id}/status`, { status: next });
-      toast.success(`Order ${order.id.slice(-8)} marked ${next}`);
+      toast.success(`Order ${formatOrderRef(order)} marked ${next}`);
       refetch();
     } catch (err) {
       toast.error(err.message);
@@ -177,6 +177,7 @@ export default function OrderDetail() {
         amount: payment.amount,
         currency: payment.currency,
         orderId: id,
+        orderRef: order.orderNumber,
         customer: order.customerInfo,
       });
 
@@ -229,7 +230,7 @@ export default function OrderDetail() {
           {isAdmin ? 'All orders' : 'My orders'}
         </Link>
         <span className="mx-2" aria-hidden="true">/</span>
-        <span className="text-content">Order {order.id.slice(-8)}</span>
+        <span className="text-content">{formatOrderRef(order)}</span>
       </nav>
 
       {/* The awaiting state must not look like a failure (US-PAY-3 AC5). */}
@@ -252,7 +253,7 @@ export default function OrderDetail() {
       <div className="card p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-title font-semibold text-content">Order {order.id.slice(-8)}</h1>
+            <h1 className="text-title font-semibold tabular-nums text-content">{formatOrderRef(order)}</h1>
             <p className="mt-1 text-meta text-content-muted">Placed {formatDateTime(order.createdAt)}</p>
           </div>
           <div className="flex flex-wrap gap-2">
